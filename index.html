@@ -439,6 +439,108 @@
 
     }
 
+    #sessionsZone h2 {
+  margin:
+    22px 0 10px;
+
+  color:
+    #172033;
+}
+
+
+.session-card {
+  margin-top:
+    12px;
+
+  padding:
+    15px;
+
+  border:
+    1px solid
+    var(--bordure);
+
+  border-radius:
+    14px;
+
+  background:
+    white;
+}
+
+
+.session-date {
+  font-size:
+    18px;
+
+  font-weight:
+    800;
+
+  color:
+    #172033;
+}
+
+
+.session-line {
+  margin-top:
+    6px;
+
+  color:
+    #475569;
+}
+
+
+.session-validation {
+  margin-top:
+    10px;
+
+  padding:
+    9px 11px;
+
+  border-radius:
+    10px;
+
+  font-size:
+    14px;
+
+  font-weight:
+    700;
+}
+
+
+.session-validation.future {
+  background:
+    #f1f5f9;
+
+  color:
+    #475569;
+}
+
+
+.session-validation.pending {
+  background:
+    #fff7ed;
+
+  color:
+    #c2410c;
+}
+
+
+.session-validation.validated {
+  background:
+    #dcfce7;
+
+  color:
+    #166534;
+}
+
+
+.session-validation.expired {
+  background:
+    #fee2e2;
+
+  color:
+    #991b1b;
+}
+
   </style>
 
 </head>
@@ -528,6 +630,21 @@
       id="connectedBox"
       class="connected-box hidden"
     >
+      <section
+  id="sessionsZone"
+  class="hidden"
+  style="margin-top:18px;"
+>
+
+  <h2>
+    Mes séances
+  </h2>
+
+  <div id="sessionsList">
+    Chargement...
+  </div>
+
+</section>
 
       <span
         id="connectedName"
@@ -1296,6 +1413,8 @@
           "success"
         );
 
+        chargerMesSeances();
+
 
         /*
          * Étape suivante :
@@ -1369,6 +1488,305 @@
       );
 
   }
+
+  function chargerMesSeances() {
+
+  const token =
+    sessionStorage.getItem(
+      TOKEN_KEY
+    );
+
+
+  if (!token) {
+
+    afficherErreur(
+      "Session introuvable. Reconnectez-vous."
+    );
+
+    return;
+
+  }
+
+
+  const zone =
+    byId(
+      "sessionsZone"
+    );
+
+
+  const list =
+    byId(
+      "sessionsList"
+    );
+
+
+  zone.classList.remove(
+    "hidden"
+  );
+
+
+  list.innerHTML =
+    "Chargement des séances...";
+
+
+  const callbackName =
+
+    "sessionsCallback_" +
+
+    Date.now();
+
+
+  window[
+    callbackName
+  ] =
+    function(result) {
+
+      delete window[
+        callbackName
+      ];
+
+
+      if (
+        !result ||
+        !result.succes
+      ) {
+
+        list.innerHTML =
+          "";
+
+
+        afficherErreur(
+          result &&
+          result.message
+            ? result.message
+            : "Impossible de charger les séances."
+        );
+
+
+        return;
+
+      }
+
+
+      afficherMesSeances(
+        result.sessions || []
+      );
+
+    };
+
+
+  const script =
+    document.createElement(
+      "script"
+    );
+
+
+  script.src =
+
+    APPS_SCRIPT_URL +
+
+    "?action=getSessions" +
+
+    "&token=" +
+    encodeURIComponent(
+      token
+    ) +
+
+    "&callback=" +
+    callbackName +
+
+    "&t=" +
+    Date.now();
+
+
+  script.onerror =
+    function() {
+
+      afficherErreur(
+        "Impossible de charger les séances."
+      );
+
+    };
+
+
+  document.body
+    .appendChild(
+      script
+    );
+
+}
+
+ function afficherMesSeances(
+  sessions
+) {
+
+  const list =
+    byId(
+      "sessionsList"
+    );
+
+
+  list.innerHTML =
+    "";
+
+
+  if (
+    !sessions ||
+    sessions.length === 0
+  ) {
+
+    list.innerHTML =
+      "<p>Aucune séance à afficher.</p>";
+
+    return;
+
+  }
+
+
+  sessions.forEach(
+    function(session) {
+
+      const card =
+        document.createElement(
+          "div"
+        );
+
+
+      card.className =
+        "session-card";
+
+
+      const date =
+        document.createElement(
+          "div"
+        );
+
+
+      date.className =
+        "session-date";
+
+
+      date.textContent =
+        session.date;
+
+
+      const horaire =
+        document.createElement(
+          "div"
+        );
+
+
+      horaire.className =
+        "session-line";
+
+
+      horaire.textContent =
+        "🕐 " +
+        session.start +
+        " - " +
+        session.end;
+
+
+      const groupe =
+        document.createElement(
+          "div"
+        );
+
+
+      groupe.className =
+        "session-line";
+
+
+      groupe.textContent =
+        "🎾 " +
+        session.groupName;
+
+
+      const validation =
+        document.createElement(
+          "div"
+        );
+
+
+      validation.className =
+        "session-validation";
+
+
+      if (
+        session.validationEtat ===
+        "AVANT_SEANCE"
+      ) {
+
+        validation.classList.add(
+          "future"
+        );
+
+      }
+
+      else if (
+        session.validationEtat ===
+        "A_VALIDER"
+      ) {
+
+        validation.classList.add(
+          "pending"
+        );
+
+      }
+
+      else if (
+        session.validationEtat ===
+        "VALIDEE"
+      ) {
+
+        validation.classList.add(
+          "validated"
+        );
+
+      }
+
+      else {
+
+        validation.classList.add(
+          "expired"
+        );
+
+      }
+
+
+      validation.textContent =
+        session.validationMessage;
+
+
+      card.appendChild(
+        date
+      );
+
+
+      card.appendChild(
+        horaire
+      );
+
+
+      card.appendChild(
+        groupe
+      );
+
+
+      card.appendChild(
+        validation
+      );
+
+
+      list.appendChild(
+        card
+      );
+
+    }
+  );
+
+}
+  
 
 
   /*
