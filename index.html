@@ -541,6 +541,89 @@
     #991b1b;
 }
 
+    .attendance-buttons,
+.player-buttons {
+  display:
+    grid;
+
+  grid-template-columns:
+    1fr 1fr;
+
+  gap:
+    9px;
+}
+
+
+.attendance-present,
+.player-present {
+  background:
+    #dcfce7;
+
+  color:
+    #166534;
+}
+
+
+.attendance-absent,
+.player-absent {
+  background:
+    #fee2e2;
+
+  color:
+    #991b1b;
+}
+
+
+.attendance-present.selected,
+.player-present.selected {
+  background:
+    #15803d;
+
+  color:
+    white;
+}
+
+
+.attendance-absent.selected,
+.player-absent.selected {
+  background:
+    #dc2626;
+
+  color:
+    white;
+}
+
+
+.player-card {
+  margin-top:
+    10px;
+
+  padding:
+    13px;
+
+  border:
+    1px solid
+    #d8e2da;
+
+  border-radius:
+    12px;
+
+  background:
+    white;
+}
+
+
+.player-name {
+  display:
+    block;
+
+  margin-bottom:
+    9px;
+
+  font-weight:
+    800;
+}
+
   </style>
 
 </head>
@@ -643,6 +726,72 @@
   <div id="sessionsList">
     Chargement...
   </div>
+
+</section>
+
+      <section
+  id="attendanceZone"
+  class="card hidden"
+  style="margin-top:18px;"
+>
+
+  <h2>
+    Feuille de présence
+  </h2>
+
+
+  <div
+    id="attendanceSessionInfo"
+    class="status"
+  ></div>
+
+
+  <h3>
+    Ma présence
+  </h3>
+
+
+  <div class="attendance-buttons">
+
+    <button
+      id="coachPresent"
+      type="button"
+      class="attendance-present"
+    >
+      ✓ Je suis présent
+    </button>
+
+
+    <button
+      id="coachAbsent"
+      type="button"
+      class="attendance-absent"
+    >
+      ✕ Je suis absent
+    </button>
+
+  </div>
+
+
+  <h3
+    style="margin-top:22px;"
+  >
+    Joueurs
+  </h3>
+
+
+  <div id="playersList">
+    Chargement...
+  </div>
+
+
+  <button
+    id="saveAttendanceButton"
+    type="button"
+    disabled
+  >
+    Valider la séance
+  </button>
 
 </section>
 
@@ -1777,6 +1926,44 @@
         validation
       );
 
+      if (
+  session.validationAutorisee
+) {
+
+  const button =
+    document.createElement(
+      "button"
+    );
+
+
+  button.type =
+    "button";
+
+
+  button.textContent =
+    session.status ===
+      "EFFECTUEE"
+      ? "Consulter / corriger"
+      : "Pointer la séance";
+
+
+  button.addEventListener(
+    "click",
+    function() {
+
+      ouvrirPointage(
+        session
+      );
+
+    }
+  );
+
+
+  card.appendChild(
+    button
+  );
+
+}
 
       list.appendChild(
         card
