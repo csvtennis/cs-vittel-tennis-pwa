@@ -222,6 +222,48 @@
         16px;
     }
 
+    input,
+button {
+  width: 100%;
+  min-height: 52px;
+
+  margin-top: 8px;
+
+  padding: 10px 12px;
+
+  border-radius: 12px;
+
+  font-size: 16px;
+}
+
+
+input {
+  border:
+    1px solid #aab7ad;
+
+  background:
+    white;
+
+}
+
+
+button {
+  border: 0;
+
+  background:
+    #146c3a;
+
+  color:
+    white;
+
+  font-weight:
+    bold;
+
+  cursor:
+    pointer;
+}
+   
+
 
     .status {
       margin-top:
@@ -296,6 +338,32 @@
 
       </select>
 
+      <div
+  id="loginZone"
+  style="display:none; margin-top:14px;"
+>
+
+  <label for="coachCode">
+    Code personnel
+  </label>
+
+  <input
+    id="coachCode"
+    type="password"
+    inputmode="numeric"
+    autocomplete="off"
+    placeholder="Saisissez votre code"
+  >
+
+  <button
+    id="loginButton"
+    type="button"
+  >
+    Se connecter
+  </button>
+
+</div>
+
 
       <div
         id="status"
@@ -307,7 +375,279 @@
     </section>
 
   </main>
+document
+  .getElementById(
+    "loginButton"
+  )
+  .addEventListener(
+    "click",
+    connecterEntraineur
+  );
 
+
+function connecterEntraineur() {
+
+  const coachId =
+    document
+      .getElementById(
+        "coachSelect"
+      )
+      .value;
+
+
+  const code =
+    document
+      .getElementById(
+        "coachCode"
+      )
+      .value
+      .trim();
+
+
+  if (
+    !coachId ||
+    !code
+  ) {
+
+    afficherErreur(
+      "Sélectionnez votre nom et saisissez votre code."
+    );
+
+    return;
+
+  }
+
+
+  /*
+   * Identifiant aléatoire de cette tentative.
+   */
+
+  const requestId =
+    crypto.randomUUID();
+
+
+  const payload = {
+
+    action:
+      "loginCoach",
+
+    requestId:
+      requestId,
+
+    coachId:
+      coachId,
+
+    code:
+      code
+
+  };
+
+
+  /*
+   * Envoi du code par POST.
+   *
+   * Important :
+   * le code n'apparaît pas dans l'URL.
+   */
+
+  fetch(
+    APPS_SCRIPT_URL,
+    {
+
+      method:
+        "POST",
+
+      mode:
+        "no-cors",
+
+      headers: {
+        "Content-Type":
+          "text/plain;charset=utf-8"
+      },
+
+      body:
+        JSON.stringify(
+          payload
+        )
+
+    }
+  )
+
+
+  .then(
+    function() {
+
+      /*
+       * On laisse Apps Script
+       * traiter la requête.
+       */
+
+      setTimeout(
+        function() {
+
+          recupererConnexion(
+            requestId
+          );
+
+        },
+        800
+      );
+
+    }
+  )
+
+
+  .catch(
+    function(error) {
+
+      afficherErreur(
+        "Impossible de contacter le serveur."
+      );
+
+      console.error(
+        error
+      );
+
+    }
+  );
+
+}
+
+  function recupererConnexion(
+  requestId
+) {
+
+  const callbackName =
+    "loginCallback_" +
+    requestId.replace(
+      /-/g,
+      ""
+    );
+
+
+  window[
+    callbackName
+  ] =
+    function(result) {
+
+      delete window[
+        callbackName
+      ];
+
+
+      if (
+        result.attente
+      ) {
+
+        setTimeout(
+          function() {
+
+            recupererConnexion(
+              requestId
+            );
+
+          },
+          600
+        );
+
+        return;
+
+      }
+
+
+      if (
+        !result.succes
+      ) {
+
+        afficherErreur(
+          result.message ||
+          "Connexion refusée."
+        );
+
+        return;
+
+      }
+
+
+      /*
+       * Jeton renvoyé par ta fonction
+       * connexionEntraineur().
+       */
+
+      sessionStorage
+        .setItem(
+          "csvt_coach_token",
+          result.token
+        );
+
+
+      document
+        .getElementById(
+          "status"
+        )
+        .classList
+        .remove(
+          "error"
+        );
+
+
+      document
+        .getElementById(
+          "status"
+        )
+        .textContent =
+        "Connexion réussie : " +
+        result.entraineur.nom;
+
+
+      /*
+       * Étape suivante :
+       * chargement des séances.
+       */
+
+    };
+
+
+  const script =
+    document.createElement(
+      "script"
+    );
+
+
+  script.src =
+
+    APPS_SCRIPT_URL +
+
+    "?action=getLoginResult" +
+
+    "&requestId=" +
+    encodeURIComponent(
+      requestId
+    ) +
+
+    "&callback=" +
+    callbackName +
+
+    "&t=" +
+    Date.now();
+
+
+  script.onerror =
+    function() {
+
+      afficherErreur(
+        "Impossible de récupérer la connexion."
+      );
+
+    };
+
+
+  document.body
+    .appendChild(
+      script
+    );
+
+}
 
   <script>
 
