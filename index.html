@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="fr">
 
 <head>
@@ -19,6 +18,11 @@
   <meta
     name="apple-mobile-web-app-capable"
     content="yes"
+  >
+
+  <meta
+    name="apple-mobile-web-app-status-bar-style"
+    content="default"
   >
 
   <meta
@@ -44,15 +48,22 @@
     href="./Icons/icon-192.png"
   >
 
-  <title>
-    CS Vittel Tennis
-  </title>
+  <link
+    rel="icon"
+    type="image/png"
+    sizes="512x512"
+    href="./Icons/icon-512.png"
+  >
+
+  <title>CS Vittel Tennis</title>
 
 
   <style>
 
     :root {
       --vert: #146c3a;
+      --vert-fonce: #0f572e;
+      --vert-clair: #dcfce7;
       --fond: #f3f7f4;
       --blanc: #ffffff;
       --texte: #172033;
@@ -65,6 +76,11 @@
 
     * {
       box-sizing: border-box;
+    }
+
+
+    html {
+      min-height: 100%;
     }
 
 
@@ -85,6 +101,11 @@
         "Segoe UI",
         Arial,
         sans-serif;
+
+      font-size: 16px;
+
+      padding-bottom:
+        env(safe-area-inset-bottom);
     }
 
 
@@ -110,17 +131,13 @@
 
 
     .logo {
-      display:
-        block;
+      display: block;
 
-      width:
-        145px;
+      width: 145px;
+      max-width: 48vw;
+      height: auto;
 
-      height:
-        auto;
-
-      margin:
-        0 auto;
+      margin: 0 auto;
     }
 
 
@@ -140,11 +157,8 @@
 
 
     main {
-      width:
-        100%;
-
-      max-width:
-        520px;
+      width: 100%;
+      max-width: 520px;
 
       margin:
         0 auto;
@@ -156,7 +170,7 @@
 
     .card {
       padding:
-        18px;
+        20px;
 
       background:
         var(--blanc);
@@ -166,20 +180,23 @@
         var(--bordure);
 
       border-radius:
-        16px;
+        18px;
 
       box-shadow:
-        0 5px 18px
-        rgba(0, 0, 0, 0.05);
+        0 6px 22px
+        rgba(0, 0, 0, 0.06);
     }
 
 
     h1 {
       margin:
-        0 0 16px;
+        0 0 20px;
 
       font-size:
-        23px;
+        25px;
+
+      line-height:
+        1.25;
     }
 
 
@@ -187,21 +204,30 @@
       display:
         block;
 
-      margin-bottom:
-        6px;
+      margin:
+        12px 0 7px;
 
       font-weight:
         700;
     }
 
 
-    select {
-      width:
-        100%;
+    select,
+    input,
+    button {
+      width: 100%;
+      min-height: 52px;
 
-      min-height:
-        52px;
+      border-radius:
+        12px;
 
+      font-size:
+        16px;
+    }
+
+
+    select,
+    input {
       padding:
         10px 12px;
 
@@ -209,71 +235,95 @@
         1px solid
         #aab7ad;
 
-      border-radius:
-        12px;
-
       background:
         var(--blanc);
 
       color:
         var(--texte);
-
-      font-size:
-        16px;
     }
 
-    input,
-button {
-  width: 100%;
-  min-height: 52px;
 
-  margin-top: 8px;
-
-  padding: 10px 12px;
-
-  border-radius: 12px;
-
-  font-size: 16px;
-}
+    select {
+      cursor:
+        pointer;
+    }
 
 
-input {
-  border:
-    1px solid #aab7ad;
+    input:focus,
+    select:focus,
+    button:focus {
+      outline:
+        3px solid
+        rgba(20, 108, 58, 0.2);
 
-  background:
-    white;
+      outline-offset:
+        2px;
+    }
 
-}
+
+    button {
+      margin-top:
+        12px;
+
+      padding:
+        10px 14px;
+
+      border:
+        none;
+
+      background:
+        var(--vert);
+
+      color:
+        var(--blanc);
+
+      font-weight:
+        800;
+
+      cursor:
+        pointer;
+
+      touch-action:
+        manipulation;
+
+      -webkit-tap-highlight-color:
+        transparent;
+    }
 
 
-button {
-  border: 0;
+    button:active {
+      background:
+        var(--vert-fonce);
+    }
 
-  background:
-    #146c3a;
 
-  color:
-    white;
+    button:disabled {
+      opacity:
+        0.6;
 
-  font-weight:
-    bold;
+      cursor:
+        not-allowed;
+    }
 
-  cursor:
-    pointer;
-}
-   
+
+    .login-zone {
+      margin-top:
+        14px;
+
+      padding-top:
+        4px;
+    }
 
 
     .status {
       margin-top:
-        14px;
+        16px;
 
       padding:
-        11px;
+        12px;
 
       border-radius:
-        11px;
+        12px;
 
       background:
         #edf5ef;
@@ -283,6 +333,9 @@ button {
 
       font-weight:
         700;
+
+      line-height:
+        1.4;
     }
 
 
@@ -294,6 +347,98 @@ button {
         var(--rouge);
     }
 
+
+    .status.loading {
+      background:
+        #f1f5f9;
+
+      color:
+        #475569;
+    }
+
+
+    .connected-box {
+      margin-top:
+        15px;
+
+      padding:
+        14px;
+
+      border:
+        2px solid
+        var(--vert);
+
+      border-radius:
+        14px;
+
+      background:
+        #f4faf6;
+    }
+
+
+    .connected-name {
+      display:
+        block;
+
+      color:
+        var(--vert-fonce);
+
+      font-size:
+        18px;
+
+      font-weight:
+        800;
+    }
+
+
+    .connected-detail {
+      display:
+        block;
+
+      margin-top:
+        5px;
+
+      color:
+        var(--gris);
+
+      font-size:
+        14px;
+    }
+
+
+    .hidden {
+      display:
+        none !important;
+    }
+
+
+    @media(max-width: 380px) {
+
+      main {
+        padding:
+          10px;
+      }
+
+
+      .card {
+        padding:
+          16px;
+      }
+
+
+      h1 {
+        font-size:
+          22px;
+      }
+
+
+      .logo {
+        width:
+          125px;
+      }
+
+    }
+
   </style>
 
 </head>
@@ -301,380 +446,173 @@ button {
 
 <body>
 
-  <header>
 
-    <img
-      class="logo"
-      src="./Icons/icon-512.png"
-      alt="CS Vittel Tennis"
+<header>
+
+  <img
+    class="logo"
+    src="./Icons/icon-512.png"
+    alt="Logo CS Vittel Tennis"
+  >
+
+  <p>
+    Application de gestion des séances et des présences
+  </p>
+
+</header>
+
+
+<main>
+
+  <section class="card">
+
+    <h1>
+      Connexion entraîneur
+    </h1>
+
+
+    <label for="coachSelect">
+      Entraîneur
+    </label>
+
+
+    <select id="coachSelect">
+
+      <option value="">
+        Chargement des entraîneurs...
+      </option>
+
+    </select>
+
+
+    <div
+      id="loginZone"
+      class="login-zone hidden"
     >
 
-    <p>
-      Application de gestion des séances et des présences
-    </p>
-
-  </header>
-
-
-  <main>
-
-    <section class="card">
-
-      <h1>
-        Test de connexion Apps Script
-      </h1>
-
-
-      <label for="coachSelect">
-        Entraîneur
+      <label for="coachCode">
+        Code personnel
       </label>
 
 
-      <select id="coachSelect">
-
-        <option value="">
-          Chargement des entraîneurs...
-        </option>
-
-      </select>
-
-      <div
-  id="loginZone"
-  style="display:none; margin-top:14px;"
->
-
-  <label for="coachCode">
-    Code personnel
-  </label>
-
-  <input
-    id="coachCode"
-    type="password"
-    inputmode="numeric"
-    autocomplete="off"
-    placeholder="Saisissez votre code"
-  >
-
-  <button
-    id="loginButton"
-    type="button"
-  >
-    Se connecter
-  </button>
-
-</div>
-
-
-      <div
-        id="status"
-        class="status"
+      <input
+        id="coachCode"
+        type="password"
+        inputmode="numeric"
+        autocomplete="off"
+        maxlength="12"
+        placeholder="Saisissez votre code"
       >
-        Connexion à Google Apps Script...
-      </div>
-
-    </section>
-
-  </main>
-document
-  .getElementById(
-    "loginButton"
-  )
-  .addEventListener(
-    "click",
-    connecterEntraineur
-  );
 
 
-function connecterEntraineur() {
+      <button
+        id="loginButton"
+        type="button"
+      >
+        Se connecter
+      </button>
 
-  const coachId =
-    document
-      .getElementById(
-        "coachSelect"
-      )
-      .value;
-
-
-  const code =
-    document
-      .getElementById(
-        "coachCode"
-      )
-      .value
-      .trim();
+    </div>
 
 
-  if (
-    !coachId ||
-    !code
-  ) {
+    <div
+      id="status"
+      class="status loading"
+      aria-live="polite"
+    >
+      Connexion à Google Apps Script...
+    </div>
 
-    afficherErreur(
-      "Sélectionnez votre nom et saisissez votre code."
-    );
 
-    return;
+    <div
+      id="connectedBox"
+      class="connected-box hidden"
+    >
+
+      <span
+        id="connectedName"
+        class="connected-name"
+      ></span>
+
+      <span
+        class="connected-detail"
+      >
+        Jeton de session enregistré pour 12 heures.
+      </span>
+
+    </div>
+
+  </section>
+
+</main>
+
+
+<script>
+
+  /*
+   * ======================================
+   * CONFIGURATION
+   * ======================================
+   *
+   * Remplace uniquement l'adresse
+   * ci-dessous par ton URL Apps Script
+   * se terminant par /exec.
+   */
+
+  const APPS_SCRIPT_URL =
+    "https://script.google.com/macros/s/AKfycbxPFDtMO7OS8VYLMK53nvL4rvo6aJWF5otzx_wVE4KzGaO5M3V39eYJiNegUwloMZo5/exec";
+
+
+  const TOKEN_KEY =
+    "csvt_coach_token";
+
+
+  /*
+   * Limite le nombre de tentatives
+   * de lecture du résultat de connexion.
+   */
+
+  const MAX_LOGIN_ATTEMPTS =
+    15;
+
+
+  /*
+   * ======================================
+   * OUTILS
+   * ======================================
+   */
+
+  function byId(id) {
+
+    return document
+      .getElementById(id);
 
   }
 
 
-  /*
-   * Identifiant aléatoire de cette tentative.
-   */
+  function afficherStatut(
+    message,
+    type
+  ) {
 
-  const requestId =
-    crypto.randomUUID();
-
-
-  const payload = {
-
-    action:
-      "loginCoach",
-
-    requestId:
-      requestId,
-
-    coachId:
-      coachId,
-
-    code:
-      code
-
-  };
+    const status =
+      byId("status");
 
 
-  /*
-   * Envoi du code par POST.
-   *
-   * Important :
-   * le code n'apparaît pas dans l'URL.
-   */
-
-  fetch(
-    APPS_SCRIPT_URL,
-    {
-
-      method:
-        "POST",
-
-      mode:
-        "no-cors",
-
-      headers: {
-        "Content-Type":
-          "text/plain;charset=utf-8"
-      },
-
-      body:
-        JSON.stringify(
-          payload
-        )
-
-    }
-  )
+    status.textContent =
+      message;
 
 
-  .then(
-    function() {
-
-      /*
-       * On laisse Apps Script
-       * traiter la requête.
-       */
-
-      setTimeout(
-        function() {
-
-          recupererConnexion(
-            requestId
-          );
-
-        },
-        800
-      );
-
-    }
-  )
-
-
-  .catch(
-    function(error) {
-
-      afficherErreur(
-        "Impossible de contacter le serveur."
-      );
-
-      console.error(
-        error
-      );
-
-    }
-  );
-
-}
-
-  function recupererConnexion(
-  requestId
-) {
-
-  const callbackName =
-    "loginCallback_" +
-    requestId.replace(
-      /-/g,
-      ""
+    status.classList.remove(
+      "error",
+      "loading"
     );
 
 
-  window[
-    callbackName
-  ] =
-    function(result) {
-
-      delete window[
-        callbackName
-      ];
-
-
-      if (
-        result.attente
-      ) {
-
-        setTimeout(
-          function() {
-
-            recupererConnexion(
-              requestId
-            );
-
-          },
-          600
-        );
-
-        return;
-
-      }
-
-
-      if (
-        !result.succes
-      ) {
-
-        afficherErreur(
-          result.message ||
-          "Connexion refusée."
-        );
-
-        return;
-
-      }
-
-
-      /*
-       * Jeton renvoyé par ta fonction
-       * connexionEntraineur().
-       */
-
-      sessionStorage
-        .setItem(
-          "csvt_coach_token",
-          result.token
-        );
-
-
-      document
-        .getElementById(
-          "status"
-        )
-        .classList
-        .remove(
-          "error"
-        );
-
-
-      document
-        .getElementById(
-          "status"
-        )
-        .textContent =
-        "Connexion réussie : " +
-        result.entraineur.nom;
-
-
-      /*
-       * Étape suivante :
-       * chargement des séances.
-       */
-
-    };
-
-
-  const script =
-    document.createElement(
-      "script"
-    );
-
-
-  script.src =
-
-    APPS_SCRIPT_URL +
-
-    "?action=getLoginResult" +
-
-    "&requestId=" +
-    encodeURIComponent(
-      requestId
-    ) +
-
-    "&callback=" +
-    callbackName +
-
-    "&t=" +
-    Date.now();
-
-
-  script.onerror =
-    function() {
-
-      afficherErreur(
-        "Impossible de récupérer la connexion."
-      );
-
-    };
-
-
-  document.body
-    .appendChild(
-      script
-    );
-
-}
-
-  <script>
-
-    /*
-     * Remplace cette URL par ton URL /exec.
-     *
-     * Elle doit se terminer exactement
-     * par /exec, sans paramètre après.
-     */
-
-    const APPS_SCRIPT_URL =
-      "https://script.google.com/macros/s/AKfycbxPFDtMO7OS8VYLMK53nvL4rvo6aJWF5otzx_wVE4KzGaO5M3V39eYJiNegUwloMZo5/exec";
-
-
-    function afficherErreur(
-      message
+    if (
+      type ===
+      "error"
     ) {
-
-      const status =
-        document.getElementById(
-          "status"
-        );
-
-
-      status.textContent =
-        message;
-
 
       status.classList.add(
         "error"
@@ -683,203 +621,812 @@ function connecterEntraineur() {
     }
 
 
-    /*
-     * Fonction appelée automatiquement
-     * par la réponse JSONP Apps Script.
-     */
-
-    function recevoirEntraineurs(
-      result
+    if (
+      type ===
+      "loading"
     ) {
 
-      const select =
-        document.getElementById(
-          "coachSelect"
-        );
-
-
-      const status =
-        document.getElementById(
-          "status"
-        );
-
-
-      select.innerHTML =
-        "";
-
-
-      const firstOption =
-        document.createElement(
-          "option"
-        );
-
-
-      firstOption.value =
-        "";
-
-
-      firstOption.textContent =
-        "Sélectionnez votre nom";
-
-
-      select.appendChild(
-        firstOption
-      );
-
-
-      if (
-        !result ||
-        !result.succes
-      ) {
-
-        afficherErreur(
-          result &&
-          result.message
-            ? result.message
-            : "Réponse invalide du serveur."
-        );
-
-
-        return;
-
-      }
-
-
-      if (
-        !Array.isArray(
-          result.coaches
-        ) ||
-        result.coaches.length ===
-          0
-      ) {
-
-        afficherErreur(
-          "Aucun entraîneur actif."
-        );
-
-
-        return;
-
-      }
-
-
-      result.coaches.forEach(
-        function(coach) {
-
-          const option =
-            document.createElement(
-              "option"
-            );
-
-
-          option.value =
-            coach.id;
-
-
-          option.textContent =
-            coach.nom;
-
-
-          select.appendChild(
-            option
-          );
-
-        }
-      );
-
-
-      select.selectedIndex =
-        0;
-
-
-      status.textContent =
-        result.coaches.length +
-        " entraîneur(s) chargé(s).";
-
-
-      status.classList.remove(
-        "error"
+      status.classList.add(
+        "loading"
       );
 
     }
 
+  }
 
-    function chargerEntraineurs() {
 
-      if (
-        APPS_SCRIPT_URL.indexOf(
-          "COLLE_ICI"
-        ) !== -1
-      ) {
+  function afficherErreur(
+    message
+  ) {
 
-        afficherErreur(
-          "L'adresse Apps Script n'a pas été renseignée."
+    afficherStatut(
+      message,
+      "error"
+    );
+
+  }
+
+
+  function supprimerScript(
+    script
+  ) {
+
+    if (
+      script &&
+      script.parentNode
+    ) {
+
+      script.parentNode
+        .removeChild(
+          script
         );
 
+    }
 
-        return;
-
-      }
-
-
-      const script =
-        document.createElement(
-          "script"
-        );
+  }
 
 
-      script.src =
+  /*
+   * ======================================
+   * RÉCEPTION DE LA LISTE ENTRAÎNEURS
+   * ======================================
+   *
+   * Cette fonction est appelée
+   * par la réponse JSONP Apps Script.
+   */
 
-        APPS_SCRIPT_URL +
+  function recevoirEntraineurs(
+    result
+  ) {
 
-        "?action=getCoaches" +
-
-        "&callback=recevoirEntraineurs" +
-
-        "&t=" +
-
-        Date.now();
-
-
-      script.onerror =
-        function() {
-
-          afficherErreur(
-            "Impossible de joindre Google Apps Script."
-          );
-
-        };
+    const select =
+      byId("coachSelect");
 
 
-      document.body.appendChild(
-        script
+    select.innerHTML =
+      "";
+
+
+    const firstOption =
+      document.createElement(
+        "option"
       );
+
+
+    firstOption.value =
+      "";
+
+
+    firstOption.textContent =
+      "Sélectionnez votre nom";
+
+
+    select.appendChild(
+      firstOption
+    );
+
+
+    if (
+      !result ||
+      !result.succes
+    ) {
+
+      afficherErreur(
+        result &&
+        result.message
+          ? result.message
+          : "Réponse invalide du serveur."
+      );
+
+
+      return;
 
     }
 
 
     if (
-      "serviceWorker" in navigator
+      !Array.isArray(
+        result.coaches
+      ) ||
+      result.coaches.length ===
+        0
     ) {
 
-      window.addEventListener(
-        "load",
-        function() {
-
-          navigator.serviceWorker
-            .register(
-              "./sw.js"
-            );
-
-        }
+      afficherErreur(
+        "Aucun entraîneur actif."
       );
+
+
+      return;
 
     }
 
 
-    chargerEntraineurs();
+    result.coaches.forEach(
+      function(coach) {
 
-  </script>
+        const option =
+          document.createElement(
+            "option"
+          );
+
+
+        option.value =
+          coach.id;
+
+
+        option.textContent =
+          coach.nom;
+
+
+        select.appendChild(
+          option
+        );
+
+      }
+    );
+
+
+    select.selectedIndex =
+      0;
+
+
+    afficherStatut(
+      result.coaches.length +
+      " entraîneur(s) chargé(s).",
+      "success"
+    );
+
+  }
+
+
+  /*
+   * ======================================
+   * CHARGEMENT DES ENTRAÎNEURS
+   * ======================================
+   */
+
+  function chargerEntraineurs() {
+
+    if (
+      APPS_SCRIPT_URL.indexOf(
+        "COLLE_ICI"
+      ) !== -1
+    ) {
+
+      afficherErreur(
+        "L'adresse Apps Script n'a pas été renseignée."
+      );
+
+
+      return;
+
+    }
+
+
+    const script =
+      document.createElement(
+        "script"
+      );
+
+
+    script.src =
+
+      APPS_SCRIPT_URL +
+
+      "?action=getCoaches" +
+
+      "&callback=recevoirEntraineurs" +
+
+      "&t=" +
+
+      Date.now();
+
+
+    script.onerror =
+      function() {
+
+        supprimerScript(
+          script
+        );
+
+
+        afficherErreur(
+          "Impossible de charger la liste des entraîneurs."
+        );
+
+      };
+
+
+    script.onload =
+      function() {
+
+        supprimerScript(
+          script
+        );
+
+      };
+
+
+    document.body
+      .appendChild(
+        script
+      );
+
+  }
+
+
+  /*
+   * ======================================
+   * AFFICHAGE DU CODE PERSONNEL
+   * ======================================
+   */
+
+  byId("coachSelect")
+    .addEventListener(
+      "change",
+      function() {
+
+        const coachId =
+          this.value;
+
+
+        byId("coachCode")
+          .value =
+          "";
+
+
+        byId("connectedBox")
+          .classList
+          .add(
+            "hidden"
+          );
+
+
+        if (!coachId) {
+
+          byId("loginZone")
+            .classList
+            .add(
+              "hidden"
+            );
+
+
+          afficherStatut(
+            "Sélectionnez un entraîneur.",
+            "loading"
+          );
+
+
+          return;
+
+        }
+
+
+        byId("loginZone")
+          .classList
+          .remove(
+            "hidden"
+          );
+
+
+        afficherStatut(
+          "Saisissez votre code personnel.",
+          "loading"
+        );
+
+
+        setTimeout(
+          function() {
+
+            byId("coachCode")
+              .focus();
+
+          },
+          100
+        );
+
+      }
+    );
+
+
+  /*
+   * ======================================
+   * BOUTON DE CONNEXION
+   * ======================================
+   */
+
+  byId("loginButton")
+    .addEventListener(
+      "click",
+      connecterEntraineur
+    );
+
+
+  byId("coachCode")
+    .addEventListener(
+      "keydown",
+      function(event) {
+
+        if (
+          event.key ===
+          "Enter"
+        ) {
+
+          event.preventDefault();
+
+
+          connecterEntraineur();
+
+        }
+
+      }
+    );
+
+
+  /*
+   * ======================================
+   * ENVOI DE LA CONNEXION
+   * ======================================
+   */
+
+  function connecterEntraineur() {
+
+    const coachId =
+      byId("coachSelect")
+        .value;
+
+
+    const code =
+      byId("coachCode")
+        .value
+        .trim();
+
+
+    const button =
+      byId("loginButton");
+
+
+    if (!coachId) {
+
+      afficherErreur(
+        "Sélectionnez votre nom."
+      );
+
+
+      return;
+
+    }
+
+
+    if (!code) {
+
+      afficherErreur(
+        "Saisissez votre code personnel."
+      );
+
+
+      return;
+
+    }
+
+
+    let requestId;
+
+
+    if (
+      window.crypto &&
+      typeof window.crypto.randomUUID ===
+        "function"
+    ) {
+
+      requestId =
+        window.crypto.randomUUID();
+
+    }
+
+    else {
+
+      requestId =
+
+        Date.now()
+          .toString() +
+
+        Math.random()
+          .toString(36)
+          .substring(2);
+
+    }
+
+
+    const payload = {
+
+      action:
+        "loginCoach",
+
+      requestId:
+        requestId,
+
+      coachId:
+        coachId,
+
+      code:
+        code
+
+    };
+
+
+    button.disabled =
+      true;
+
+
+    button.textContent =
+      "Connexion...";
+
+
+    afficherStatut(
+      "Vérification du code personnel...",
+      "loading"
+    );
+
+
+    fetch(
+      APPS_SCRIPT_URL,
+      {
+
+        method:
+          "POST",
+
+        mode:
+          "no-cors",
+
+        headers: {
+
+          "Content-Type":
+            "text/plain;charset=utf-8"
+
+        },
+
+        body:
+          JSON.stringify(
+            payload
+          )
+
+      }
+    )
+
+      .then(
+        function() {
+
+          /*
+           * Laisse Apps Script traiter
+           * le POST avant de demander
+           * le résultat.
+           */
+
+          setTimeout(
+            function() {
+
+              recupererConnexion(
+                requestId,
+                0
+              );
+
+            },
+            900
+          );
+
+        }
+      )
+
+      .catch(
+        function(error) {
+
+          console.error(
+            error
+          );
+
+
+          button.disabled =
+            false;
+
+
+          button.textContent =
+            "Se connecter";
+
+
+          afficherErreur(
+            "Impossible de contacter Google Apps Script."
+          );
+
+        }
+      );
+
+  }
+
+
+  /*
+   * ======================================
+   * RÉCUPÉRATION DU JETON
+   * ======================================
+   */
+
+  function recupererConnexion(
+    requestId,
+    attempt
+  ) {
+
+    if (
+      attempt >=
+      MAX_LOGIN_ATTEMPTS
+    ) {
+
+      byId("loginButton")
+        .disabled =
+        false;
+
+
+      byId("loginButton")
+        .textContent =
+        "Se connecter";
+
+
+      afficherErreur(
+        "La connexion a expiré. Réessayez."
+      );
+
+
+      return;
+
+    }
+
+
+    const callbackName =
+
+      "loginCallback_" +
+
+      requestId.replace(
+        /-/g,
+        ""
+      ) +
+
+      "_" +
+
+      attempt;
+
+
+    window[
+      callbackName
+    ] =
+      function(result) {
+
+        delete window[
+          callbackName
+        ];
+
+
+        supprimerScript(
+          script
+        );
+
+
+        if (
+          result &&
+          result.attente
+        ) {
+
+          setTimeout(
+            function() {
+
+              recupererConnexion(
+                requestId,
+                attempt + 1
+              );
+
+            },
+            700
+          );
+
+
+          return;
+
+        }
+
+
+        byId("loginButton")
+          .disabled =
+          false;
+
+
+        byId("loginButton")
+          .textContent =
+          "Se connecter";
+
+
+        if (
+          !result ||
+          !result.succes
+        ) {
+
+          afficherErreur(
+            result &&
+            result.message
+              ? result.message
+              : "Connexion refusée."
+          );
+
+
+          return;
+
+        }
+
+
+        /*
+         * Enregistrement local
+         * du jeton de 12 heures.
+         */
+
+        sessionStorage
+          .setItem(
+            TOKEN_KEY,
+            result.token
+          );
+
+
+        byId("coachCode")
+          .value =
+          "";
+
+
+        byId("connectedName")
+          .textContent =
+          "Connexion réussie : " +
+          result.entraineur.nom;
+
+
+        byId("connectedBox")
+          .classList
+          .remove(
+            "hidden"
+          );
+
+
+        afficherStatut(
+          "Jeton de session enregistré.",
+          "success"
+        );
+
+
+        /*
+         * Étape suivante :
+         * utiliser result.token pour
+         * charger les séances.
+         */
+
+      };
+
+
+    const script =
+      document.createElement(
+        "script"
+      );
+
+
+    script.src =
+
+      APPS_SCRIPT_URL +
+
+      "?action=getLoginResult" +
+
+      "&requestId=" +
+
+      encodeURIComponent(
+        requestId
+      ) +
+
+      "&callback=" +
+
+      callbackName +
+
+      "&t=" +
+
+      Date.now();
+
+
+    script.onerror =
+      function() {
+
+        delete window[
+          callbackName
+        ];
+
+
+        supprimerScript(
+          script
+        );
+
+
+        byId("loginButton")
+          .disabled =
+          false;
+
+
+        byId("loginButton")
+          .textContent =
+          "Se connecter";
+
+
+        afficherErreur(
+          "Impossible de récupérer le résultat de connexion."
+        );
+
+      };
+
+
+    document.body
+      .appendChild(
+        script
+      );
+
+  }
+
+
+  /*
+   * ======================================
+   * SERVICE WORKER
+   * ======================================
+   */
+
+  if (
+    "serviceWorker" in navigator
+  ) {
+
+    window.addEventListener(
+      "load",
+      function() {
+
+        navigator
+          .serviceWorker
+          .register(
+            "./sw.js"
+          )
+
+          .then(
+            function() {
+
+              console.log(
+                "Service Worker enregistré."
+              );
+
+            }
+          )
+
+          .catch(
+            function(error) {
+
+              console.log(
+                "Erreur Service Worker :",
+                error
+              );
+
+            }
+          );
+
+      }
+    );
+
+  }
+
+
+  /*
+   * ======================================
+   * LANCEMENT
+   * ======================================
+   */
+
+  chargerEntraineurs();
+
+</script>
 
 </body>
 
