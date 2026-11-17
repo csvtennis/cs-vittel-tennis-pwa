@@ -832,6 +832,13 @@
   const TOKEN_KEY =
     "csvt_coach_token";
 
+  let currentSession = null;
+
+let currentPlayers = [];
+
+let currentAttendance = {};
+
+let coachAttendance = "";
 
   /*
    * Limite le nombre de tentatives
@@ -1973,8 +1980,817 @@
   );
 
 }
-  
 
+  function ouvrirPointage(session) {
+
+  currentSession =
+    session;
+
+  currentPlayers =
+    [];
+
+  currentAttendance =
+    {};
+
+  coachAttendance =
+    (
+      session.coachAttendance ||
+      ""
+    ).toUpperCase();
+
+
+  byId("attendanceZone")
+    .classList
+    .remove("hidden");
+
+
+  byId("attendanceSessionInfo")
+    .innerHTML =
+
+    "<strong>" +
+    session.date +
+    "</strong><br>" +
+
+    "🕐 " +
+    session.start +
+    " - " +
+    session.end +
+    "<br>" +
+
+    "🎾 " +
+    session.groupName;
+
+
+  byId("coachPresent")
+    .classList
+    .toggle(
+      "selected",
+      coachAttendance ===
+        "PRESENT"
+    );
+
+
+  byId("coachAbsent")
+    .classList
+    .toggle(
+      "selected",
+      coachAttendance ===
+        "ABSENT"
+    );
+
+
+  byId("playersList")
+    .innerHTML =
+    "Chargement des joueurs...";
+
+
+  const token =
+    sessionStorage.getItem(
+      TOKEN_KEY
+    );
+
+
+  const callbackName =
+    "attendanceCallback_" +
+    Date.now();
+
+
+  window[callbackName] =
+    function(result) {
+
+      delete window[
+        callbackName
+      ];
+
+
+      if (
+        !result ||
+        !result.succes
+      ) {
+
+        afficherErreur(
+          result &&
+          result.message
+            ? result.message
+            : "Impossible de charger les joueurs."
+        );
+
+        return;
+
+      }
+
+
+      currentPlayers =
+        result.players || [];
+
+
+      currentAttendance =
+        Object.assign(
+          {},
+          result.attendance || {}
+        );
+
+
+      afficherJoueurs();
+
+    };
+
+
+  const script =
+    document.createElement(
+      "script"
+    );
+
+
+  script.src =
+
+    APPS_SCRIPT_URL +
+
+    "?action=getAttendance" +
+
+    "&token=" +
+    encodeURIComponent(token) +
+
+    "&sessionId=" +
+    encodeURIComponent(
+      session.id
+    ) +
+
+    "&callback=" +
+    callbackName +
+
+    "&t=" +
+    Date.now();
+
+
+  script.onerror =
+    function() {
+
+      afficherErreur(
+        "Impossible de récupérer la feuille de présence."
+      );
+
+    };
+
+
+  document.body.appendChild(
+    script
+  );
+
+
+  byId("attendanceZone")
+    .scrollIntoView({
+      behavior: "smooth"
+    });
+
+}
+  
+function afficherJoueurs() {
+
+  const zone =
+    byId("playersList");
+
+
+  zone.innerHTML =
+    "";
+
+
+  if (
+    currentPlayers.length === 0
+  ) {
+
+    zone.innerHTML =
+      "<p>Aucun joueur actif.</p>";
+
+    mettreAJourValidation();
+
+    return;
+
+  }
+
+
+  currentPlayers.forEach(
+    function(player) {
+
+      const card =
+        document.createElement(
+          "div"
+        );
+
+
+      card.className =
+        "player-card";
+
+
+      const name =
+        document.createElement(
+          "span"
+        );
+
+
+      name.className =
+        "player-name";
+
+
+      name.textContent =
+        player.name;
+
+
+      const buttons =
+        document.createElement(
+          "div"
+        );
+
+
+      buttons.className =
+        "player-buttons";
+
+
+      const present =
+        document.createElement(
+          "button"
+        );
+
+
+      present.type =
+        "button";
+
+
+      present.className =
+        "player-present";
+
+
+      present.textContent =
+        "✓ Présent";
+
+
+      const absent =
+        document.createElement(
+          "button"
+        );
+
+
+      absent.type =
+        "button";
+
+
+      absent.className =
+        "player-absent";
+
+
+      absent.textContent =
+        "✕ Absent";
+
+
+      present.classList.toggle(
+        "selected",
+        currentAttendance[
+          player.id
+        ] ===
+          "PRESENT"
+      );
+
+
+      absent.classList.toggle(
+        "selected",
+        currentAttendance[
+          player.id
+        ] ===
+          "ABSENT"
+      );
+
+
+      present.addEventListener(
+        "click",
+        function() {
+
+          currentAttendance[
+            player.id
+          ] =
+            "PRESENT";
+
+
+          present.classList.add(
+            "selected"
+          );
+
+
+          absent.classList.remove(
+            "selected"
+          );
+
+
+          mettreAJourValidation();
+
+        }
+      );
+
+
+      absent.addEventListener(
+        "click",
+        function() {
+
+          currentAttendance[
+            player.id
+          ] =
+            "ABSENT";
+
+
+          absent.classList.add(
+            "selected"
+          );
+
+
+          present.classList.remove(
+            "selected"
+          );
+
+
+          mettreAJourValidation();
+
+        }
+      );
+
+
+      buttons.appendChild(
+        present
+      );
+
+
+      buttons.appendChild(
+        absent
+      );
+
+
+      card.appendChild(
+        name
+      );
+
+
+      card.appendChild(
+        buttons
+      );
+
+
+      zone.appendChild(
+        card
+      );
+
+    }
+  );
+
+
+  mettreAJourValidation();
+
+}
+  
+  function selectionnerPresenceEntraineur(
+  value
+) {
+
+  coachAttendance =
+    value;
+
+
+  byId("coachPresent")
+    .classList
+    .toggle(
+      "selected",
+      value === "PRESENT"
+    );
+
+
+  byId("coachAbsent")
+    .classList
+    .toggle(
+      "selected",
+      value === "ABSENT"
+    );
+
+
+  mettreAJourValidation();
+
+}
+
+
+byId("coachPresent")
+  .addEventListener(
+    "click",
+    function() {
+
+      selectionnerPresenceEntraineur(
+        "PRESENT"
+      );
+
+    }
+  );
+
+
+byId("coachAbsent")
+  .addEventListener(
+    "click",
+    function() {
+
+      selectionnerPresenceEntraineur(
+        "ABSENT"
+      );
+
+    }
+  );
+
+  function mettreAJourValidation() {
+
+  const tousRenseignes =
+    currentPlayers.length > 0 &&
+
+    currentPlayers.every(
+      function(player) {
+
+        return (
+          currentAttendance[
+            player.id
+          ] === "PRESENT" ||
+
+          currentAttendance[
+            player.id
+          ] === "ABSENT"
+        );
+
+      }
+    );
+
+
+  const entraineurRenseigne =
+    coachAttendance === "PRESENT" ||
+    coachAttendance === "ABSENT";
+
+
+  byId("saveAttendanceButton")
+    .disabled =
+    !tousRenseignes ||
+    !entraineurRenseigne;
+
+}
+
+  byId("saveAttendanceButton")
+  .addEventListener(
+    "click",
+    enregistrerPointage
+  );
+
+
+function enregistrerPointage() {
+
+  if (!currentSession) {
+
+    afficherErreur(
+      "Aucune séance ouverte."
+    );
+
+    return;
+
+  }
+
+
+  const token =
+    sessionStorage.getItem(
+      TOKEN_KEY
+    );
+
+
+  if (!token) {
+
+    afficherErreur(
+      "Session expirée. Reconnectez-vous."
+    );
+
+    return;
+
+  }
+
+
+  const items =
+    currentPlayers.map(
+      function(player) {
+
+        return {
+
+          playerId:
+            player.id,
+
+          status:
+            currentAttendance[
+              player.id
+            ]
+
+        };
+
+      }
+    );
+
+
+  const requestId =
+    window.crypto &&
+    typeof window.crypto.randomUUID ===
+      "function"
+
+      ? window.crypto.randomUUID()
+
+      : Date.now().toString() +
+        Math.random()
+          .toString(36)
+          .substring(2);
+
+
+  const payload = {
+
+    action:
+      "saveAttendance",
+
+    requestId:
+      requestId,
+
+    token:
+      token,
+
+    sessionId:
+      currentSession.id,
+
+    coachAttendance:
+      coachAttendance,
+
+    items:
+      items
+
+  };
+
+
+  const button =
+    byId(
+      "saveAttendanceButton"
+    );
+
+
+  button.disabled =
+    true;
+
+
+  button.textContent =
+    "Enregistrement...";
+
+
+  fetch(
+    APPS_SCRIPT_URL,
+    {
+
+      method:
+        "POST",
+
+      mode:
+        "no-cors",
+
+      headers: {
+
+        "Content-Type":
+          "text/plain;charset=utf-8"
+
+      },
+
+      body:
+        JSON.stringify(
+          payload
+        )
+
+    }
+  )
+
+    .then(
+      function() {
+
+        setTimeout(
+          function() {
+
+            recupererResultatPointage(
+              requestId,
+              0
+            );
+
+          },
+          900
+        );
+
+      }
+    )
+
+    .catch(
+      function() {
+
+        button.disabled =
+          false;
+
+
+        button.textContent =
+          "Valider la séance";
+
+
+        afficherErreur(
+          "Impossible d'enregistrer la séance."
+        );
+
+      }
+    );
+
+}
+
+  function recupererResultatPointage(
+  requestId,
+  attempt
+) {
+
+  if (
+    attempt >= 15
+  ) {
+
+    byId("saveAttendanceButton")
+      .disabled =
+      false;
+
+
+    byId("saveAttendanceButton")
+      .textContent =
+      "Valider la séance";
+
+
+    afficherErreur(
+      "Délai dépassé pendant l'enregistrement."
+    );
+
+
+    return;
+
+  }
+
+
+  const callbackName =
+
+    "saveCallback_" +
+
+    requestId.replace(
+      /-/g,
+      ""
+    ) +
+
+    "_" +
+
+    attempt;
+
+
+  const script =
+    document.createElement(
+      "script"
+    );
+
+
+  window[callbackName] =
+    function(result) {
+
+      delete window[
+        callbackName
+      ];
+
+
+      supprimerScript(
+        script
+      );
+
+
+      if (
+        result &&
+        result.attente
+      ) {
+
+        setTimeout(
+          function() {
+
+            recupererResultatPointage(
+              requestId,
+              attempt + 1
+            );
+
+          },
+          700
+        );
+
+
+        return;
+
+      }
+
+
+      byId("saveAttendanceButton")
+        .textContent =
+        "Valider la séance";
+
+
+      if (
+        !result ||
+        !result.succes
+      ) {
+
+        mettreAJourValidation();
+
+
+        afficherErreur(
+          result &&
+          result.message
+            ? result.message
+            : "Erreur d'enregistrement."
+        );
+
+
+        return;
+
+      }
+
+
+      afficherStatut(
+        result.message ||
+        "Séance enregistrée.",
+        "success"
+      );
+
+
+      byId("attendanceZone")
+        .classList
+        .add(
+          "hidden"
+        );
+
+
+      currentSession =
+        null;
+
+
+      /*
+       * Recharge les séances :
+       * PLANIFIEE devient EFFECTUEE
+       * et le pointage reste corrigeable
+       * pendant la fenêtre autorisée.
+       */
+
+      chargerMesSeances();
+
+    };
+
+
+  script.src =
+
+    APPS_SCRIPT_URL +
+
+    "?action=getSaveResult" +
+
+    "&requestId=" +
+    encodeURIComponent(
+      requestId
+    ) +
+
+    "&callback=" +
+    callbackName +
+
+    "&t=" +
+    Date.now();
+
+
+  script.onerror =
+    function() {
+
+      delete window[
+        callbackName
+      ];
+
+
+      supprimerScript(
+        script
+      );
+
+
+      mettreAJourValidation();
+
+
+      afficherErreur(
+        "Impossible de vérifier l'enregistrement."
+      );
+
+    };
+
+
+  document.body
+    .appendChild(
+      script
+    );
+
+}
+  
 
   /*
    * ======================================
