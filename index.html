@@ -22,11 +22,6 @@
   >
 
   <meta
-    name="apple-mobile-web-app-status-bar-style"
-    content="default"
-  >
-
-  <meta
     name="apple-mobile-web-app-title"
     content="CS Vittel Tennis"
   >
@@ -56,18 +51,33 @@
 
   <style>
 
+    :root {
+      --vert: #146c3a;
+      --fond: #f3f7f4;
+      --blanc: #ffffff;
+      --texte: #172033;
+      --gris: #64748b;
+      --bordure: #d8e2da;
+      --rouge-clair: #fee2e2;
+      --rouge: #991b1b;
+    }
+
+
+    * {
+      box-sizing: border-box;
+    }
+
+
     body {
       margin: 0;
 
       min-height: 100vh;
 
-      display: flex;
+      background:
+        var(--fond);
 
-      align-items: center;
-
-      justify-content: center;
-
-      background: #f3f7f4;
+      color:
+        var(--texte);
 
       font-family:
         -apple-system,
@@ -78,49 +88,168 @@
     }
 
 
-    .card {
-      width: calc(100% - 32px);
+    header {
+      padding:
+        calc(
+          14px +
+          env(safe-area-inset-top)
+        )
+        16px
+        16px;
 
-      max-width: 420px;
+      background:
+        var(--blanc);
 
-      padding: 30px 20px;
+      border-bottom:
+        4px solid
+        var(--vert);
 
-      background: white;
-
-      border-radius: 20px;
-
-      text-align: center;
-
-      box-shadow:
-        0 8px 30px
-        rgba(0, 0, 0, 0.08);
+      text-align:
+        center;
     }
 
 
     .logo {
-      width: 150px;
+      display:
+        block;
 
-      height: auto;
+      width:
+        145px;
 
-      margin-bottom: 20px;
+      height:
+        auto;
+
+      margin:
+        0 auto;
+    }
+
+
+    header p {
+      margin:
+        8px 0 0;
+
+      color:
+        var(--gris);
+
+      font-size:
+        14px;
+
+      font-weight:
+        600;
+    }
+
+
+    main {
+      width:
+        100%;
+
+      max-width:
+        520px;
+
+      margin:
+        0 auto;
+
+      padding:
+        16px;
+    }
+
+
+    .card {
+      padding:
+        18px;
+
+      background:
+        var(--blanc);
+
+      border:
+        1px solid
+        var(--bordure);
+
+      border-radius:
+        16px;
+
+      box-shadow:
+        0 5px 18px
+        rgba(0, 0, 0, 0.05);
     }
 
 
     h1 {
-      margin: 0 0 10px;
+      margin:
+        0 0 16px;
 
-      color: #146c3a;
-
-      font-size: 27px;
+      font-size:
+        23px;
     }
 
 
-    p {
-      margin: 0;
+    label {
+      display:
+        block;
 
-      color: #64748b;
+      margin-bottom:
+        6px;
 
-      line-height: 1.5;
+      font-weight:
+        700;
+    }
+
+
+    select {
+      width:
+        100%;
+
+      min-height:
+        52px;
+
+      padding:
+        10px 12px;
+
+      border:
+        1px solid
+        #aab7ad;
+
+      border-radius:
+        12px;
+
+      background:
+        var(--blanc);
+
+      color:
+        var(--texte);
+
+      font-size:
+        16px;
+    }
+
+
+    .status {
+      margin-top:
+        14px;
+
+      padding:
+        11px;
+
+      border-radius:
+        11px;
+
+      background:
+        #edf5ef;
+
+      color:
+        #166534;
+
+      font-weight:
+        700;
+    }
+
+
+    .status.error {
+      background:
+        var(--rouge-clair);
+
+      color:
+        var(--rouge);
     }
 
   </style>
@@ -130,7 +259,7 @@
 
 <body>
 
-  <div class="card">
+  <header>
 
     <img
       class="logo"
@@ -138,20 +267,260 @@
       alt="CS Vittel Tennis"
     >
 
-    <h1>
-      CS Vittel Tennis
-    </h1>
-
     <p>
       Application de gestion des séances et des présences
     </p>
 
-  </div>
+  </header>
+
+
+  <main>
+
+    <section class="card">
+
+      <h1>
+        Test de connexion Apps Script
+      </h1>
+
+
+      <label for="coachSelect">
+        Entraîneur
+      </label>
+
+
+      <select id="coachSelect">
+
+        <option value="">
+          Chargement des entraîneurs...
+        </option>
+
+      </select>
+
+
+      <div
+        id="status"
+        class="status"
+      >
+        Connexion à Google Apps Script...
+      </div>
+
+    </section>
+
+  </main>
 
 
   <script>
 
-    if ("serviceWorker" in navigator) {
+    /*
+     * Remplace cette URL par ton URL /exec.
+     *
+     * Elle doit se terminer exactement
+     * par /exec, sans paramètre après.
+     */
+
+    const APPS_SCRIPT_URL =
+      "https://script.google.com/macros/s/AKfycbxPFDtMO7OS8VYLMK53nvL4rvo6aJWF5otzx_wVE4KzGaO5M3V39eYJiNegUwloMZo5/exec";
+
+
+    function afficherErreur(
+      message
+    ) {
+
+      const status =
+        document.getElementById(
+          "status"
+        );
+
+
+      status.textContent =
+        message;
+
+
+      status.classList.add(
+        "error"
+      );
+
+    }
+
+
+    /*
+     * Fonction appelée automatiquement
+     * par la réponse JSONP Apps Script.
+     */
+
+    function recevoirEntraineurs(
+      result
+    ) {
+
+      const select =
+        document.getElementById(
+          "coachSelect"
+        );
+
+
+      const status =
+        document.getElementById(
+          "status"
+        );
+
+
+      select.innerHTML =
+        "";
+
+
+      const firstOption =
+        document.createElement(
+          "option"
+        );
+
+
+      firstOption.value =
+        "";
+
+
+      firstOption.textContent =
+        "Sélectionnez votre nom";
+
+
+      select.appendChild(
+        firstOption
+      );
+
+
+      if (
+        !result ||
+        !result.succes
+      ) {
+
+        afficherErreur(
+          result &&
+          result.message
+            ? result.message
+            : "Réponse invalide du serveur."
+        );
+
+
+        return;
+
+      }
+
+
+      if (
+        !Array.isArray(
+          result.coaches
+        ) ||
+        result.coaches.length ===
+          0
+      ) {
+
+        afficherErreur(
+          "Aucun entraîneur actif."
+        );
+
+
+        return;
+
+      }
+
+
+      result.coaches.forEach(
+        function(coach) {
+
+          const option =
+            document.createElement(
+              "option"
+            );
+
+
+          option.value =
+            coach.id;
+
+
+          option.textContent =
+            coach.nom;
+
+
+          select.appendChild(
+            option
+          );
+
+        }
+      );
+
+
+      select.selectedIndex =
+        0;
+
+
+      status.textContent =
+        result.coaches.length +
+        " entraîneur(s) chargé(s).";
+
+
+      status.classList.remove(
+        "error"
+      );
+
+    }
+
+
+    function chargerEntraineurs() {
+
+      if (
+        APPS_SCRIPT_URL.indexOf(
+          "COLLE_ICI"
+        ) !== -1
+      ) {
+
+        afficherErreur(
+          "L'adresse Apps Script n'a pas été renseignée."
+        );
+
+
+        return;
+
+      }
+
+
+      const script =
+        document.createElement(
+          "script"
+        );
+
+
+      script.src =
+
+        APPS_SCRIPT_URL +
+
+        "?action=getCoaches" +
+
+        "&callback=recevoirEntraineurs" +
+
+        "&t=" +
+
+        Date.now();
+
+
+      script.onerror =
+        function() {
+
+          afficherErreur(
+            "Impossible de joindre Google Apps Script."
+          );
+
+        };
+
+
+      document.body.appendChild(
+        script
+      );
+
+    }
+
+
+    if (
+      "serviceWorker" in navigator
+    ) {
 
       window.addEventListener(
         "load",
@@ -160,33 +529,15 @@
           navigator.serviceWorker
             .register(
               "./sw.js"
-            )
-
-            .then(
-              function() {
-
-                console.log(
-                  "Service Worker enregistré."
-                );
-
-              }
-            )
-
-            .catch(
-              function(error) {
-
-                console.log(
-                  "Erreur Service Worker :",
-                  error
-                );
-
-              }
             );
 
         }
       );
 
     }
+
+
+    chargerEntraineurs();
 
   </script>
 
