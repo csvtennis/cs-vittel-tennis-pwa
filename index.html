@@ -626,21 +626,27 @@
     800;
 }
 
-  .logout-button {
-  margin-top: 12px;
+ .logout-button {
+  margin-top: 10px;
 
-  background: #f1f5f9;
+  background: #dc2626;
 
-  color: #475569;
+  color: #ffffff;
 
-  border:
-    1px solid #cbd5e1;
+  border: none;
+
+  font-weight: 800;
 }
 
 
 .logout-button:active {
-  background: #e2e8f0;
-}  
+  background: #b91c1c;
+}
+
+
+.logout-button:hover {
+  background: #b91c1c;
+}
 
   </style>
 
@@ -714,6 +720,14 @@
       >
         Se connecter
       </button>
+      
+      <button
+  id="logoutButton"
+  type="button"
+  class="logout-button hidden"
+>
+  Déconnexion
+</button>
 
     </div>
 
@@ -823,14 +837,6 @@
       >
         Jeton de session enregistré pour 12 heures.
       </span>
-      
-<button
-  id="logoutButton"
-  type="button"
-  class="logout-button"
->
-  Déconnexion
-</button>
       
     </div>
 
@@ -1733,6 +1739,33 @@ let coachAttendance = "";
   .setItem(
     TOKEN_KEY,
     result.token
+  );
+
+        byId("loginZone")
+  .classList
+  .remove(
+    "hidden"
+  );
+
+
+byId("coachCode")
+  .classList
+  .add(
+    "hidden"
+  );
+
+
+byId("loginButton")
+  .classList
+  .add(
+    "hidden"
+  );
+
+
+byId("logoutButton")
+  .classList
+  .remove(
+    "hidden"
   );
 
 
@@ -3164,6 +3197,33 @@ function verifierSessionExistante() {
         .disabled =
         true;
 
+      byId("loginZone")
+  .classList
+  .remove(
+    "hidden"
+  );
+
+
+byId("coachCode")
+  .classList
+  .add(
+    "hidden"
+  );
+
+
+byId("loginButton")
+  .classList
+  .add(
+    "hidden"
+  );
+
+
+byId("logoutButton")
+  .classList
+  .remove(
+    "hidden"
+  );
+
 
       afficherStatut(
         "Session restaurée : " +
@@ -3273,48 +3333,48 @@ function verifierSessionExistante() {
   coachAttendance =
     "";
 
-
-  byId("connectedBox")
-    .classList
-    .add(
-      "hidden"
-    );
-
-
-  byId("sessionsZone")
-    .classList
-    .add(
-      "hidden"
-    );
+byId("loginZone")
+  .classList
+  .add(
+    "hidden"
+  );
 
 
-  byId("attendanceZone")
-    .classList
-    .add(
-      "hidden"
-    );
+byId("coachCode")
+  .classList
+  .remove(
+    "hidden"
+  );
 
 
-  byId("coachSelect")
-    .disabled =
-    false;
+byId("coachCode")
+  .value =
+  "";
 
 
-  byId("coachSelect")
-    .value =
-    "";
+byId("loginButton")
+  .classList
+  .remove(
+    "hidden"
+  );
 
 
-  byId("coachCode")
-    .value =
-    "";
+byId("logoutButton")
+  .classList
+  .add(
+    "hidden"
+  );
 
 
-  byId("loginZone")
-    .classList
-    .add(
-      "hidden"
-    );
+byId("coachSelect")
+  .disabled =
+  false;
+
+
+byId("coachSelect")
+  .value =
+  "";
+
 
 
   afficherStatut(
