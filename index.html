@@ -858,8 +858,8 @@
 
   const TOKEN_KEY =
     "csvt_coach_token";
-
-  let currentSession = null;
+  
+let currentSession = null;
 
 let currentPlayers = [];
 
@@ -875,6 +875,12 @@ let coachAttendance = "";
   const MAX_LOGIN_ATTEMPTS =
     15;
 
+  const EXPIRATION_KEY =
+  "csvt_coach_expiration";
+
+
+let timerSessionInterval =
+  null;
 
   /*
    * ======================================
@@ -1526,13 +1532,6 @@ let coachAttendance = "";
     button.textContent =
       "Connexion...";
 
-
-    afficherStatut(
-      "Vérification du code personnel...",
-      "loading"
-    );
-
-
     fetch(
       APPS_SCRIPT_URL,
       {
@@ -1733,6 +1732,16 @@ let coachAttendance = "";
     TOKEN_KEY,
     result.token
   );
+
+   localStorage.setItem(
+  EXPIRATION_KEY,
+  String(result.expiration)
+);
+
+
+demarrerTimerSession(
+  result.expiration
+);
 
         byId("loginZone")
   .classList
@@ -3134,6 +3143,16 @@ function verifierSessionExistante() {
         !result.succes
       ) {
 
+        localStorage.setItem(
+  EXPIRATION_KEY,
+  String(result.expiration)
+);
+
+
+demarrerTimerSession(
+  result.expiration
+);
+
         localStorage.removeItem(
           TOKEN_KEY
         );
@@ -3260,6 +3279,24 @@ script.onerror =
       TOKEN_KEY
     );
 
+   localStorage.removeItem(
+  EXPIRATION_KEY
+);
+
+
+if (
+  timerSessionInterval
+) {
+
+  clearInterval(
+    timerSessionInterval
+  );
+
+
+  timerSessionInterval =
+    null;
+
+}
 
   /*
    * Suppression immédiate du jeton
@@ -3510,6 +3547,167 @@ byId("logoutButton")
     "click",
     deconnecterEntraineur
   );  
+
+  function demarrerTimerSession(
+  expiration
+) {
+
+  /*
+   * Arrête un ancien timer
+   * s'il existe déjà.
+   */
+
+  if (
+    timerSessionInterval
+  ) {
+
+    clearInterval(
+      timerSessionInterval
+    );
+
+  }
+
+
+  function actualiserTimer() {
+
+    const maintenant =
+      Date.now();
+
+
+    const restant =
+      Number(expiration) -
+      maintenant;
+
+
+    /*
+     * Session terminée.
+     */
+
+    if (
+      restant <= 0
+   *) {
+
+      clearInterval(
+        *imerSessionInterval
+      );
+
+
+   *  timerSessionInterval =
+        n*ll;
+
+
+      localStorage.removeIte*(
+        TOKEN_KEY
+      );
+
+
+   *  localStorage.removeItem(
+       *EXPIRATION_KEY
+      );
+
+
+      af*icherStatut(
+        "Session expi*ée. Reconnectez-vous.",
+        "e*ror"
+      );
+
+
+      byId("connec*edBox")
+        .classList
+       *.add(
+          "hidden"
+        )*
+
+
+      byId("sessionsZone")
+        .classList
+        .add(
+          "hidden"
+        );
+
+
+      byId("attendanceZone")
+        .classList
+        .add(
+          "hidden"
+        );
+
+
+      byId("coachSelect")
+        .disabled =
+        false;
+
+
+      chargerEntraineurs();
+
+
+      return;
+
+    }
+
+
+    /*
+     * Calcul heures / minutes.
+     */
+
+    const totalMinutes =
+   *  Math.ceil(
+        restant /
+   *    60000
+      );
+
+
+    const heu*es =
+      Math.floor(
+        totalMinutes /
+        60
+      );
+
+
+    const minutes =
+      totalMinutes %
+      60;
+
+
+    /*
+     * Affichage dans la zone
+     * de notification existante.
+     */
+
+    afficherStatut(
+      "Sess*on restante : " +
+      heures +
+ *    " h " +
+      String(minutes)
+*       .padStart(
+          2,
+   *      "0"
+        ) +
+      " min",
+      "success"
+    );
+
+  }
+
+
+  /*
+   * Affichage immédiat.
+   */
+
+  actualiserTimer();
+
+
+  /*
+   * Mise à jour chaque minute.
+   */
+
+  timerSessionInterval =
+    setInterval(
+      actualiserTimer,
+      60000
+    );
+
+}
 
   /*
    * ======================================
