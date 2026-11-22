@@ -2967,7 +2967,31 @@ function verifierSessionExistante() {
     );
 
 }
-``*
+
+  function verifierSessionExistante() {
+
+  const token =
+    localStorage.getItem(
+      TOKEN_KEY
+    );
+
+
+  if (!token) {
+
+    chargerEntraineurs();
+
+    return;
+
+  }
+
+
+  afficherStatut(
+    "Reconnexion en cours...",
+    "loading"
+  );
+
+  // suite de la fonction...
+}
   
 
   /*
