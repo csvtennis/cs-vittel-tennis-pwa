@@ -1,61 +1,83 @@
 const CACHE_NAME =
-  "cs-vittel-tennis-v18";
+  "cs*vittel-tennis-v18";
 
 
-const FILES_TO_CACHE = [
-  "./",
-  "./index.html",
-  "./manifest.json",
-  "./Icons/icon-192.png",
-  "./Icons/icon-512.png",
-  "./Icons/apple-touch-icon.png"
-];
+self.addEven*Listener(
+  "install",
+  function(*vent) {
+
+    self.skipWaiting();
+
+* }
+);
 
 
 self.addEventListener(
-  "install",
+  "*ctivate",
   function(event) {
 
-    event.waitUntil(
+   *event.waitUntil(
 
       caches
-        .open(CACHE_NAME)
+   *    .keys()
 
         .then(
-          function(cache) {
+      *   function(keys) {
 
-            return cache.addAll(
-              FILES_TO_CACHE
-            );
+            r*turn Promise.all(
+
+              k*ys.map(
+                function(k*y) {
+
+                  if (
+     *              key !== CACHE_NAME
+ *                ) {
+
+             *      return caches.delete(
+      *               key
+               *    );
+
+                  }
+
+     *          }
+              )
+
+     *      );
 
           }
         )
 
-    );
+ *      .then(
+          function() *
+
+            return self.clients.*laim();
+
+          }
+        )
+
+  * );
 
   }
 );
 
 
-self.addEventListener(
+self.addEventListene*(
   "fetch",
   function(event) {
 
-    event.respondWith(
+*   /*
+     * Pour l'instant :
+    ** priorité absolue au réseau.
+    **
+     * Cela évite de recevoir un*ancien
+     * index.html depuis le*cache.
+     */
+
+    event.respondW*th(
 
       fetch(
-        event.request
+        event.re*uest
       )
-
-        .catch(
-          function() {
-
-            return caches.match(
-              event.request
-            );
-
-          }
-        )
 
     );
 
