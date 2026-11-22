@@ -793,7 +793,104 @@
 #adminError {
   margin-top: 12px;
 }
-    
+
+/*
+ * ======================================
+ * ESPACE ADMINISTRATION
+ * ======================================
+ */
+
+.admin-panel {
+  margin-top: 18px;
+
+  padding: 18px;
+
+  background: #ffffff;
+
+  border:
+    1px solid #d8e2da;
+
+  border-radius: 16px;
+
+  box-shadow:
+    0 6px 22px
+    rgba(0, 0, 0, 0.06);
+}
+
+
+.admin-panel-header {
+  padding-bottom: 14px;
+
+  margin-bottom: 16px;
+
+  border-bottom:
+    2px solid #172033;
+}
+
+
+.admin-panel-header h2 {
+  margin: 0;
+
+  color: #172033;
+
+  font-size: 24px;
+}
+
+
+.admin-panel-header p {
+  margin:
+    5px 0 0;
+
+  color: #64748b;
+
+  font-size: 14px;
+}
+
+
+.admin-welcome {
+  padding: 14px;
+
+  margin-bottom: 18px;
+
+  background: #edf5ef;
+
+  color: #166534;
+
+  border-radius: 12px;
+}
+
+
+.admin-welcome p {
+  margin:
+    6px 0 0;
+}
+
+
+.admin-logout-button {
+  width: 100%;
+
+  min-height: 52px;
+
+  background: #dc2626;
+
+  color: #ffffff;
+
+  border: none;
+
+  border-radius: 12px;
+
+  font-size: 16px;
+
+  font-weight: 800;
+
+  cursor: pointer;
+}
+
+
+.admin-logout-button:active {
+  background: #b91c1c;
+}
+   
 
   </style>
 
@@ -949,6 +1046,46 @@
 
 </div>   
 
+   <section
+  id="adminPanel"
+  class="admin-panel hidden"
+>
+
+  <div class="admin-panel-header">
+
+    <h2>
+      ⚙️ Administration
+    </h2>
+
+    <p>
+      CS Vittel Tennis
+    </p>
+
+  </div>
+
+
+  <div class="admin-welcome">
+
+    <strong>
+      Accès administrateur activé
+    </strong>
+
+    <p>
+      L'espace administration est prêt.
+    </p>
+
+  </div>
+
+
+  <button
+    id="adminLogoutButton"
+    type="button"
+    class="admin-logout-button"
+  >
+    Quitter l'administration
+  </button>
+
+</section> 
 
     <div
   id="status"
@@ -4142,6 +4279,381 @@ byId("adminBackButton")
   .addEventListener(
     "click",
     retourAdministration
+  );
+
+  function connecterAdministrateur() {
+
+  const code =
+    byId("adminCode")
+      .value
+      .trim();
+
+
+  const errorZone =
+    byId("adminError");
+
+
+  /*
+   * Nettoyage de l'ancien message.
+   */
+
+  errorZone.textContent =
+    "";
+
+
+  errorZone.classList.add(
+    "hidden"
+  );
+
+
+  /*
+   * Code absent.
+   */
+
+  if (!code) {
+
+    errorZone.textContent =
+      "Veuillez saisir le code administrateur.";
+
+
+    errorZone.classList.remove(
+      "hidden"
+    );
+
+
+    return;
+
+  }
+
+
+  /*
+   * Désactive temporairement le bouton.
+   */
+
+  const button =
+    byId("adminLoginButton");
+
+
+  button.disabled =
+    true;
+
+
+  button.textContent =
+    "Connexion...";
+
+
+  /*
+   * Fonction JSONP unique.
+   */
+
+  const callbackName =
+    "adminLoginCallback_" +
+    Date.now();
+
+
+  const script =
+    document.createElement(
+      "script"
+    );
+
+
+  window[callbackName] =
+    function(result) {
+
+      delete window[
+        callbackName
+      ];
+
+
+      supprimerScript(
+        script
+      );
+
+
+      button.disabled =
+        false;
+
+
+      button.textContent =
+        "Se connecter";
+
+
+      /*
+       * Code incorrect.
+       */
+
+      if (
+        !result ||
+        !result.succes
+      ) {
+
+        errorZone.textContent =
+          result &&
+          result.message
+            ? result.message
+            : "Code administrateur incorrect.";
+
+
+        errorZone.classList.remove(
+          "hidden"
+        );
+
+
+        return;
+
+      }
+
+
+      /*
+       * Connexion administrateur réussie.
+       */
+
+      byId("adminCode")
+        .value =
+        "";
+
+
+      ouvrirEspaceAdministrateur();
+
+    };
+
+
+  /*
+   * Appel Apps Script.
+   */
+
+  script.src =
+
+    APPS_SCRIPT_URL +
+
+    "?action=adminLogin" +
+
+    "&code=" +
+    encodeURIComponent(
+      code
+    ) +
+
+    "&callback=" +
+    callbackName +
+
+    "&t=" +
+    Date.now();
+
+
+  script.onerror =
+    function() {
+
+      delete window[
+        callbackName
+      ];
+
+
+      supprimerScript(
+        script
+      );
+
+
+      button.disabled =
+        false;
+
+
+      button.textContent =
+        "Se connecter";
+
+
+      errorZone.textContent =
+        "Impossible de contacter le serveur.";
+
+
+      errorZone.classList.remove(
+        "hidden"
+      );
+
+    };
+
+
+  document.body
+    .appendChild(
+      script
+    );
+
+}
+  byId("adminLoginButton")
+  .addEventListener(
+    "click",
+    connecterAdministrateur
+  );
+  byId("adminCode")
+  .addEventListener(
+    "keydown",
+    function(event) {
+
+      if (
+        event.key ===
+        "Enter"
+      ) {
+
+        event.preventDefault();
+
+
+        connecterAdministrateur();
+
+      }
+
+    }
+  );
+
+  function ouvrirEspaceAdministrateur() {
+
+  /*
+   * Masque la connexion administrateur.
+   */
+
+  byId("adminLoginZone")
+    .classList
+    .add(
+      "hidden"
+    );
+
+
+  /*
+   * Masque le bouton d'accès Administration.
+   */
+
+  byId("adminAccessZone")
+    .classList
+    .add(
+      "hidden"
+    );
+
+
+  /*
+   * Masque les éléments entraîneur
+   * pendant l'utilisation de l'administration.
+   */
+
+  byId("connectedBox")
+    .classList
+    .add(
+      "hidden"
+    );
+
+
+  byId("sessionsZone")
+    .classList
+    .add(
+      "hidden"
+    );
+
+
+  byId("attendanceZone")
+    .classList
+    .add(
+      "hidden"
+    );
+
+
+  /*
+   * Masque le sélecteur / connexion
+   * entraîneur.
+   */
+
+  byId("coachSelect")
+    .disabled =
+    true;
+
+
+  /*
+   * Affiche l'espace Administration.
+   */
+
+  byId("adminPanel")
+    .classList
+    .remove(
+      "hidden"
+    );
+
+
+  /*
+   * Efface l'ancien code administrateur.
+   */
+
+  byId("adminCode")
+    .value =
+    "";
+
+}
+
+  function quitterEspaceAdministrateur() {
+
+  /*
+   * Ferme l'administration.
+   */
+
+  byId("adminPanel")
+    .classList
+    .add(
+      "hidden"
+    );
+
+
+  /*
+   * Réactive la sélection entraîneur.
+   */
+
+  byId("coachSelect")
+    .disabled =
+    false;
+
+
+  /*
+   * Réaffiche le bouton Administration.
+   */
+
+  byId("adminAccessZone")
+    .classList
+    .remove(
+      "hidden"
+    );
+
+
+  /*
+   * Vérifie s'il existe encore
+   * une session entraîneur valide localement.
+   */
+
+  const token =
+    localStorage.getItem(
+      TOKEN_KEY
+    );
+
+
+  if (token) {
+
+    /*
+     * On restaure l'affichage entraîneur.
+     * Le jeton n'est pas supprimé.
+     */
+
+    verifierSessionExistante();
+
+  }
+
+  else {
+
+    /*
+     * Sinon retour à la connexion classique.
+     */
+
+    chargerEntraineurs();
+
+  }
+
+}
+byId("adminLogoutButton")
+  .addEventListener(
+    "click",
+    quitterEspaceAdministrateur
   );
 
   /*
