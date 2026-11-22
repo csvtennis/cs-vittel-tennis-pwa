@@ -3548,97 +3548,86 @@ byId("logoutButton")
     deconnecterEntraineur
   );  
 
-  function demarrerTimerSession(
-  expiration
-) {
+ function demarrerTimerSession(expiration) {
 
   /*
-   * Arrête un ancien timer
-   * s'il existe déjà.
+   * Conversion et contrôle de la date d'expiration.
+   */
+
+  const expirationTimestamp =
+    Number(expiration);
+
+
+  if (
+    !Number.isFinite(expirationTimestamp)
+  ) {
+
+    console.error(
+      "Expiration de session invalide :",
+      expiration
+    );
+
+    return;
+
+  }
+
+
+  /*
+   * Arrêt d'un éventuel compteur existant.
    */
 
   if (
-    timerSessionInterval
+    timerSessionInterval !== null
   ) {
 
     clearInterval(
       timerSessionInterval
     );
 
+
+    timerSessionInterval =
+      null;
+
   }
 
 
   function actualiserTimer() {
 
-    const maintenant =
+    const restant =
+      expirationTimestamp -
       Date.now();
 
 
-    const restant =
-      Number(expiration) -
-      maintenant;
-
-
     /*
-     * Session terminée.
+     * Le compteur est arrivé à zéro.
+     *
+     * Le timer reste uniquement visuel :
+     * le jeton n'est pas supprimé ici.
      */
 
     if (
       restant <= 0
-   *) {
+    ) {
 
-      clearInterval(
-        *imerSessionInterval
-      );
+      if (
+        timerSessionInterval !== null
+      ) {
 
-
-   *  timerSessionInterval =
-        n*ll;
-
-
-      localStorage.removeIte*(
-        TOKEN_KEY
-      );
-
-
-   *  localStorage.removeItem(
-       *EXPIRATION_KEY
-      );
-
-
-      af*icherStatut(
-        "Session expi*ée. Reconnectez-vous.",
-        "e*ror"
-      );
-
-
-      byId("connec*edBox")
-        .classList
-       *.add(
-          "hidden"
-        )*
-
-
-      byId("sessionsZone")
-        .classList
-        .add(
-          "hidden"
+        clearInterval(
+          timerSessionInterval
         );
 
 
-      byId("attendanceZone")
-        .classList
-        .add(
-          "hidden"
-        );
+        timerSessionInterval =
+          null;
+
+      }
 
 
-      byId("coachSelect")
-        .disabled =
-        false;
-
-
-      chargerEntraineurs();
+      afficherStatut(
+        "Session expirée. Reconnectez-vous.",
+        "error"
+      );
 
 
       return;
@@ -3647,42 +3636,37 @@ byId("logoutButton")
 
 
     /*
-     * Calcul heures / minutes.
+     * Calcul du temps restant.
      */
 
     const totalMinutes =
-   *  Math.ceil(
-        restant /
-   *    60000
+      Math.ceil(
+        restant / 60000
       );
 
 
-    const heu*es =
+    const heures =
       Math.floor(
-        totalMinutes /
-        60
+        totalMinutes / 60
       );
 
 
     const minutes =
-      totalMinutes %
-      60;
+      totalMinutes % 60;
 
 
     /*
-     * Affichage dans la zone
-     * de notification existante.
+     * Affichage.
      */
 
     afficherStatut(
-      "Sess*on restante : " +
+      "Session restante : " +
       heures +
- *    " h " +
-      String(minutes)
-*       .padStart(
-          2,
-   *      "0"
-        ) +
+      " h " +
+      String(minutes).padStart(
+        2,
+        "0"
+      ) +
       " min",
       "success"
     );
@@ -3691,14 +3675,14 @@ byId("logoutButton")
 
 
   /*
-   * Affichage immédiat.
+   * Premier affichage immédiat.
    */
 
   actualiserTimer();
 
 
   /*
-   * Mise à jour chaque minute.
+   * Actualisation toutes les minutes.
    */
 
   timerSessionInterval =
