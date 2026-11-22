@@ -1,84 +1,67 @@
 const CACHE_NAME =
-  "cs*vittel-tennis-v18";
-
-
-self.addEven*Listener(
-  "install",
-  function(*vent) {
-
-    self.skipWaiting();
-
-* }
-);
+  "cs-vittel-tennis-v19";
 
 
 self.addEventListener(
-  "*ctivate",
-  function(event) {
+  "install",
+  function() {
 
-   *event.waitUntil(
-
-      caches
-   *    .keys()
-
-        .then(
-      *   function(keys) {
-
-            r*turn Promise.all(
-
-              k*ys.map(
-                function(k*y) {
-
-                  if (
-     *              key !== CACHE_NAME
- *                ) {
-
-             *      return caches.delete(
-      *               key
-               *    );
-
-                  }
-
-     *          }
-              )
-
-     *      );
-
-          }
-        )
-
- *      .then(
-          function() *
-
-            return self.clients.*laim();
-
-          }
-        )
-
-  * );
+    self.skipWaiting();
 
   }
 );
 
 
-self.addEventListene*(
+self.addEventListener(
+  "activate",
+  function(event) {
+
+    event.waitUntil(
+
+      caches
+        .keys()
+        .then(
+          function(keys) {
+
+            return Promise.all(
+
+              keys.map(
+                function(key) {
+
+                  return caches.delete(
+                    key
+                  );
+
+                }
+              )
+
+            );
+
+          }
+        )
+
+        .then(
+          function() {
+
+            return self.clients.claim();
+
+          }
+        )
+
+    );
+
+  }
+);
+
+
+self.addEventListener(
   "fetch",
   function(event) {
 
-*   /*
-     * Pour l'instant :
-    ** priorité absolue au réseau.
-    **
-     * Cela évite de recevoir un*ancien
-     * index.html depuis le*cache.
-     */
-
-    event.respondW*th(
-
+    event.respondWith(
       fetch(
-        event.re*uest
+        event.request
       )
-
     );
 
   }
