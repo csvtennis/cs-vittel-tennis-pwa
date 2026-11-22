@@ -624,6 +624,22 @@
     800;
 }
 
+  .logout-button {
+  margin-top: 12px;
+
+  background: #f1f5f9;
+
+  color: #475569;
+
+  border:
+    1px solid #cbd5e1;
+}
+
+
+.logout-button:active {
+  background: #e2e8f0;
+}  
+
   </style>
 
 </head>
@@ -805,7 +821,15 @@
       >
         Jeton de session enregistré pour 12 heures.
       </span>
-
+      
+<button
+  id="logoutButton"
+  type="button"
+  class="logout-button"
+>
+  Déconnexion
+</button>
+      
     </div>
 
   </section>
@@ -2982,8 +3006,182 @@ function verifierSessionExistante() {
 
 }
 
-  
-  
+  function deconnecterEntraineur() {
+
+  const token =
+    localStorage.getItem(
+      TOKEN_KEY
+    );
+
+
+  /*
+   * Suppression du jeton
+   * enregistré sur le téléphone.
+   */
+
+  localStorage.removeItem(
+    TOKEN_KEY
+  );
+
+
+  /*
+   * Réinitialisation des variables.
+   */
+
+  currentSession = null;
+
+  currentPlayers = [];
+
+  currentAttendance = {};
+
+  coachAttendance = "";
+
+
+  /*
+   * Masquage des données
+   * de l'entraîneur précédent.
+   */
+
+  byId("connectedBox")
+    .classList
+    .add(
+      "hidden"
+    );
+
+
+  byId("sessionsZone")
+    .classList
+    .add(
+      "hidden"
+    );
+
+
+  byId("attendanceZone")
+    .classList
+    .add(
+      "hidden"
+    );
+
+
+  /*
+   * Réinitialisation connexion.
+   */
+
+  byId("coachSelect")
+    .di*abled =
+    false;
+
+
+  byId("coach*elect")
+    .value =
+    "";
+
+
+  b*Id("coachCode")
+    .value =
+    "*;
+
+
+  byId("loginZone")
+    .class*ist
+    .add(
+      "hidden"
+    );
+
+
+  afficherStatut(
+    "Déconnexion effectuée.",
+    "success"
+  );
+
+
+  /*
+   * Suppression du jeton
+   * également côté Apps Script.
+   */
+
+  if (token) {
+
+    const callb*ckName =
+      "logoutCallback_" +*      Date.now();
+
+
+    const scri*t =
+      document.createElement(
+*       "script"
+      );
+
+
+    win*ow[callbackName] =
+      function(*esult) {
+
+        delete window[
+          callbackName
+        ];
+
+
+*       supprimerScript(
+          *cript
+        );
+
+      };
+
+
+    s*ript.src =
+
+      APPS_SCRIPT_URL *
+
+      "?action=logout" +
+
+      *&token=" +
+      encodeURIComponen*(
+        token
+      ) +
+
+      "*callback=" +
+      callbackName +
+
+      "&t=" +
+      Date.now();
+
+
+    script.onerror =
+      function() {
+
+        delete window[
+          callbackName
+        ];
+
+
+        supprimerScript(
+          script
+        );
+
+      };
+
+
+    document.body
+      .appendChild(
+        script
+      );
+
+  }
+
+
+  /*
+   * Recharge la liste pour
+   * une éventuelle nouvelle connexion.
+   */
+
+  chargerEntraineurs();
+
+}
+
+by*d("logoutButton")
+  .addEventListe*er(
+    "click",
+    deconnecterEn*raineur
+  );  
 
   /*
    * ======================================
