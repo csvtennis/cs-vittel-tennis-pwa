@@ -3015,8 +3015,7 @@ function verifierSessionExistante() {
 
 
   /*
-   * Suppression du jeton
-   * enregistré sur le téléphone.
+   * Suppression locale immédiate.
    */
 
   localStorage.removeItem(
@@ -3024,23 +3023,18 @@ function verifierSessionExistante() {
   );
 
 
-  /*
-   * Réinitialisation des variables.
-   */
+  currentSession =
+    null;
 
-  currentSession = null;
+  currentPlayers =
+    [];
 
-  currentPlayers = [];
+  currentAttendance =
+    {};
 
-  currentAttendance = {};
+  coachAttendance =
+    "";
 
-  coachAttendance = "";
-
-
-  /*
-   * Masquage des données
-   * de l'entraîneur précédent.
-   */
 
   byId("connectedBox")
     .classList
@@ -3063,27 +3057,23 @@ function verifierSessionExistante() {
     );
 
 
-  /*
-   * Réinitialisation connexion.
-   */
-
   byId("coachSelect")
-    .di*abled =
+    .disabled =
     false;
 
 
-  byId("coach*elect")
+  byId("coachSelect")
     .value =
     "";
 
 
-  b*Id("coachCode")
+  byId("coachCode")
     .value =
-    "*;
+    "";
 
 
   byId("loginZone")
-    .class*ist
+    .classList
     .add(
       "hidden"
     );
@@ -3096,49 +3086,50 @@ function verifierSessionExistante() {
 
 
   /*
-   * Suppression du jeton
-   * également côté Apps Script.
+   * Suppression également
+   * côté Apps Script.
    */
 
   if (token) {
 
-    const callb*ckName =
-      "logoutCallback_" +*      Date.now();
+    const callbackName =
+      "logoutCallback_" +
+      Date.now();
 
 
-    const scri*t =
+    const script =
       document.createElement(
-*       "script"
+        "script"
       );
 
 
-    win*ow[callbackName] =
-      function(*esult) {
+    window[callbackName] =
+      function() {
 
         delete window[
           callbackName
         ];
 
 
-*       supprimerScript(
-          *cript
+        supprimerScript(
+          script
         );
 
       };
 
 
-    s*ript.src =
+    script.src =
 
-      APPS_SCRIPT_URL *
+      APPS_SCRIPT_URL +
 
       "?action=logout" +
 
-      *&token=" +
-      encodeURIComponen*(
+      "&token=" +
+      encodeURIComponent(
         token
       ) +
 
-      "*callback=" +
+      "&callback=" +
       callbackName +
 
       "&t=" +
@@ -3167,11 +3158,6 @@ function verifierSessionExistante() {
 
   }
 
-
-  /*
-   * Recharge la liste pour
-   * une éventuelle nouvelle connexion.
-   */
 
   chargerEntraineurs();
 
