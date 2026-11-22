@@ -1149,6 +1149,7 @@
 </div>   
 
    <section
+  <section
   id="adminPanel"
   class="admin-panel hidden"
 >
@@ -1179,6 +1180,164 @@
   </div>
 
 
+  <!-- =====================================
+       NOUVEAU CRÉNEAU RÉCURRENT
+       ===================================== -->
+
+  <div
+    id="adminRecurringSlot"
+    class="admin-section"
+  >
+
+    <h3>
+      🔁 Nouveau créneau récurrent
+    </h3>
+
+
+    <form id="slotForm">
+
+      <label for="slotCoach">
+        Entraîneur
+      </label>
+
+      <select
+        id="slotCoach"
+        required
+      >
+
+        <option value="">
+          Sélectionnez un entraîneur
+        </option>
+
+      </select>
+
+
+      <label for="slotGroup">
+        Groupe
+      </label>
+
+      <select
+        id="slotGroup"
+        required
+      >
+
+        <option value="">
+          Sélectionnez un groupe
+        </option>
+
+      </select>
+
+
+      <label for="slotDay">
+        Jour
+      </label>
+
+      <select
+        id="slotDay"
+        required
+      >
+
+        <option value="LUNDI">
+          Lundi
+        </option>
+
+        <option value="MARDI">
+          Mardi
+        </option>
+
+        <option value="MERCREDI">
+          Mercredi
+        </option>
+
+        <option value="JEUDI">
+          Jeudi
+        </option>
+
+        <option value="VENDREDI">
+          Vendredi
+        </option>
+
+        <option value="SAMEDI">
+          Samedi
+        </option>
+
+        <option value="DIMANCHE">
+          Dimanche
+        </option>
+
+      </select>
+
+
+      <label for="slotStart">
+        Heure de début
+      </label>
+
+      <input
+        id="slotStart"
+        type="time"
+        value="14:00"
+        required
+      >
+
+
+      <label for="slotEnd">
+        Heure de fin
+      </label>
+
+      <input
+        id="slotEnd"
+        type="time"
+        value="15:30"
+        required
+      >
+
+
+      <label for="slotFrom">
+        Date de début
+      </label>
+
+      <input
+        id="slotFrom"
+        type="date"
+        required
+      >
+
+
+      <label for="slotTo">
+        Date de fin
+      </label>
+
+      <input
+        id="slotTo"
+        type="date"
+        required
+      >
+
+
+      <button
+        id="createSlotButton"
+        type="submit"
+        class="admin-create-button"
+      >
+        Créer et générer les séances
+      </button>
+
+    </form>
+
+
+    <div
+      id="slotMessage"
+      class="status hidden"
+      aria-live="polite"
+    ></div>
+
+  </div>
+
+
+  <!-- =====================================
+       SORTIE ADMINISTRATION
+       ===================================== -->
+
   <button
     id="adminLogoutButton"
     type="button"
@@ -1187,7 +1346,7 @@
     Quitter l'administration
   </button>
 
-</section> 
+</section>
 
     <div
   id="status"
@@ -4614,7 +4773,9 @@ byId("adminBackButton")
   function ouvrirEspaceAdministrateur() {
 
   /*
-   * Masque la connexion administrateur.
+   * ======================================
+   * 1. MASQUER LA CONNEXION ADMIN
+   * ======================================
    */
 
   byId("adminLoginZone")
@@ -4624,11 +4785,30 @@ byId("adminBackButton")
     );
 
 
+  /*
+   * ======================================
+   * 2. MASQUER LE BOUTON ADMINISTRATION
+   * ======================================
+   *
+   * Il réapparaîtra lorsque l'on quittera
+   * l'espace Administration.
+   */
+
+  byId("adminAccessZone")
+    .classList
+    .add(
+      "hidden"
+    );
 
 
   /*
-   * Masque les éléments entraîneur
-   * pendant l'utilisation de l'administration.
+   * ======================================
+   * 3. MASQUER TEMPORAIREMENT
+   *    L'ESPACE ENTRAÎNEUR
+   * ======================================
+   *
+   * IMPORTANT :
+   * le jeton entraîneur reste intact.
    */
 
   byId("connectedBox")
@@ -4653,34 +4833,69 @@ byId("adminBackButton")
 
 
   /*
-   * Masque le sélecteur / connexion
-   * entraîneur.
+   * ======================================
+   * 4. MASQUER LE FORMULAIRE
+   *    DE CONNEXION ENTRAÎNEUR
+   * ======================================
    */
 
-  byId("coachSelect")
-    .disabled =
-    true;
+  byId("loginZone")
+    .classList
+    .add(
+      "hidden"
+    );
 
 
   /*
-   * Affiche l'espace Administration.
+   * ======================================
+   * 5. AFFICHER L'ESPACE ADMINISTRATION
+   * ======================================
    */
 
- byId("adminPanel")
-  .classList
-  .remove(
-    "hidden"
-  );
+  byId("adminPanel")
+    .classList
+    .remove(
+      "hidden"
+    );
 
 
-byId("adminCode")
-  .value =
-  "";
+  /*
+   * ======================================
+   * 6. EFFACER LE CODE ADMINISTRATEUR
+   * ======================================
+   */
+
+  byId("adminCode")
+    .value =
+    "";
 
 
-chargerDonneesAdministration();
+  byId("adminError")
+    .textContent =
+    "";
+
+
+  byId("adminError")
+    .classList
+    .add(
+      "hidden"
+    );
+
+
+  /*
+   * ======================================
+   * 7. CHARGER LES DONNÉES ADMINISTRATION
+   * ======================================
+   *
+   * Remplit :
+   * - slotCoach
+   * - slotGroup
+   */
+
+  chargerDonneesAdministration();
 
 }
+
 
   function quitterEspaceAdministrateur() {
 
