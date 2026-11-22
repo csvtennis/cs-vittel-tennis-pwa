@@ -1539,11 +1539,11 @@ let coachAttendance = "";
          * du jeton de 12 heures.
          */
 
-        sessionStorage
-          .setItem(
-            TOKEN_KEY,
-            result.token
-          );
+        localStorage
+  .setItem(
+    TOKEN_KEY,
+    result.token
+  );
 
 
         byId("coachCode")
@@ -1648,7 +1648,7 @@ let coachAttendance = "";
   function chargerMesSeances() {
 
   const token =
-    sessionStorage.getItem(
+    localStorage.getItem(
       TOKEN_KEY
     );
 
@@ -2045,7 +2045,7 @@ let coachAttendance = "";
 
 
   const token =
-    sessionStorage.getItem(
+    localStorage.getItem(
       TOKEN_KEY
     );
 
@@ -2453,7 +2453,7 @@ function enregistrerPointage() {
 
 
   const token =
-    sessionStorage.getItem(
+    localStorage.getItem(
       TOKEN_KEY
     );
 
@@ -2790,6 +2790,184 @@ function enregistrerPointage() {
     );
 
 }
+
+  /*
+ * ======================================
+ * RECONNEXION AUTOMATIQUE
+ * ======================================
+ */
+
+function verifierSessionExistante() {
+
+  const token =
+    localStorage.getItem(
+      TOKEN_KEY
+    );
+
+
+  /*
+   * Aucun jeton enregistré :
+   * connexion normale.
+   */
+
+  if (!token) {
+
+    chargerEnt*aineurs();
+
+    return;
+
+  }
+
+
+  a*ficherStatut(
+    "Reconnexion en *ours...",
+    "loading"
+  );
+
+
+  const callbackName =
+
+    "sessionCallback_" +
+    Date.now();
+
+
+  const script =
+    document.createElement(
+      "script"
+    );
+
+
+  window[callbackName] =
+    function(result) {
+
+      delete window[
+        callbackName
+      ];
+
+
+      supprimerScript(
+        script
+      );
+
+
+      /*
+       * Jeton invalide ou expiré.
+       */
+
+      if (
+        !result ||
+ *      !result.succes
+      ) {
+
+  *     localStorage
+          .remov*Item(
+            TOKEN_KEY
+      *   );
+
+
+        afficherStatut(
+          "Session expirée. Reconnectez-vous.",
+          "error"
+        );
+
+
+        chargerEntraineurs();
+
+        return;
+
+      }
+
+
+      /*
+       * Session encore valide.
+       */
+
+      byId("connectedName"*
+        .textContent =
+        "C*nnexion réussie : " +
+        resu*t.entraineur.nom;
+
+
+      byId("co*nectedBox")
+        .classList
+        .remove(
+          "hidden"
+        );
+
+
+      /*
+       * On n'a plus besoin
+       * de la saisie du code.
+       */
+
+      byId("loginZone")
+       *.classList
+        .add(
+          "hidden"
+        );
+
+
+      afficherStatut(
+        "Session restaurée.",
+        "success"
+      );
+
+
+      /*
+       * Charge immédiatement
+       * les séances de l'entraîneur.
+       */
+
+      chargerMesSeances()*
+
+    };
+
+
+  script.src =
+
+    APP*_SCRIPT_URL +
+
+    "?action=checkS*ssion" +
+
+    "&token=" +
+    enco*eURIComponent(
+      token
+    ) +*
+    "&callback=" +
+    callbackNa*e +
+
+    "&t=" +
+    Date.now();
+
+*  script.onerror =
+    function() *
+
+      delete window[
+        callbackName
+      ];
+
+
+      supprime*Script(
+        script
+      );
+
+
+*     afficherErreur(
+        "Impo*sible de vérifier la session."
+   *  );
+
+
+      chargerEntraineurs();*
+    };
+
+
+  document.body
+    .app*ndChild(
+      script
+    );
+
+}
+``*
   
 
   /*
@@ -2845,7 +3023,7 @@ function enregistrerPointage() {
    * ======================================
    */
 
-  chargerEntraineurs();
+ verifierSessionExistante();
 
 </script>
 
