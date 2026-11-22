@@ -4759,18 +4759,12 @@ byId("adminLogoutButton")
   const coachSelect =
     byId("slotCoach");
 
-
   const groupSelect =
     byId("slotGroup");
-
 
   const messageZone =
     byId("slotMessage");
 
-
-  /*
-   * Vérification des éléments HTML.
-   */
 
   if (
     !coachSelect ||
@@ -4779,42 +4773,20 @@ byId("adminLogoutButton")
   ) {
 
     console.error(
-      "Éléments Administration introuvables."
+      "Les éléments du formulaire Administration sont introuvables."
     );
 
     return;
-
   }
 
 
-  /*
-   * Affichage pendant le chargement.
-   */
-
   coachSelect.innerHTML =
-    '<option value="">' +
-    'Chargement des entraîneurs...' +
-    '</option>';
+    '<option value="">Chargement des entraîneurs...</option>';
 
 
   groupSelect.innerHTML =
-    '<option value="">' +
-    'Chargement des groupes...' +
-    '</option>';
+    '<option value="">Chargement des groupes...</option>';
 
-
-  messageZone.textContent =
-    "";
-
-
-  messageZone.classList.add(
-    "hidden"
-  );
-
-
-  /*
-   * Callback JSONP unique.
-   */
 
   const callbackName =
     "adminDataCallback_" +
@@ -4834,19 +4806,17 @@ byId("adminLogoutButton")
         callbackName
       ];
 
-
       supprimerScript(
         script
       );
 
 
       /*
-       * Nettoyage des menus.
+       * Nettoyage des deux menus.
        */
 
       coachSelect.innerHTML =
         "";
-
 
       groupSelect.innerHTML =
         "";
@@ -4861,14 +4831,11 @@ byId("adminLogoutButton")
           "option"
         );
 
-
       coachEmpty.value =
         "";
 
-
       coachEmpty.textContent =
         "Sélectionnez un entraîneur";
-
 
       coachSelect.appendChild(
         coachEmpty
@@ -4884,14 +4851,11 @@ byId("adminLogoutButton")
           "option"
         );
 
-
       groupEmpty.value =
         "";
 
-
       groupEmpty.textContent =
         "Sélectionnez un groupe";
-
 
       groupSelect.appendChild(
         groupEmpty
@@ -4899,12 +4863,12 @@ byId("adminLogoutButton")
 
 
       /*
-       * Vérification de la réponse serveur.
+       * Contrôle réponse serveur.
        */
 
       if (
         !result ||
-        !result.succes
+        result.succes !== true
       ) {
 
         messageZone.textContent =
@@ -4913,94 +4877,95 @@ byId("adminLogoutButton")
             ? result.message
             : "Impossible de charger les données Administration.";
 
-
         messageZone.classList.remove(
           "hidden"
         );
 
-
         return;
+      }
+
+
+      /*
+       * ENTRAÎNEURS
+       */
+
+      if (
+        Array.isArray(
+          result.coaches
+        )
+      ) {
+
+        result.coaches.forEach(
+          function(coach) {
+
+            const option =
+              document.createElement(
+                "option"
+              );
+
+            option.value =
+              coach.id || "";
+
+            option.textContent =
+              coach.name || coach.id;
+
+            coachSelect.appendChild(
+              option
+            );
+
+          }
+        );
 
       }
 
 
       /*
-       * Remplissage entraîneurs.
+       * GROUPES
        */
 
-      const coaches =
-        Array.isArray(result.coaches)
-          ? result.coaches
-          : [];
+      if (
+        Array.isArray(
+          result.groups
+        )
+      ) {
 
+        result.groups.forEach(
+          function(group) {
 
-      coaches.forEach(
-        function(coach) {
+            const option =
+              document.createElement(
+                "option"
+              );
 
-          const option =
-            document.createElement(
-              "option"
+            option.value =
+              group.id || "";
+
+            option.textContent =
+              group.name || group.id;
+
+            groupSelect.appendChild(
+              option
             );
 
+          }
+        );
 
-          option.value =
-            coach.id;
-
-
-          option.textContent =
-            coach.name;
-
-
-          coachSelect.appendChild(
-            option
-          );
-
-        }
-      );
+      }
 
 
       /*
-       * Remplissage groupes.
+       * Fin de chargement.
        */
 
-      const groups =
-        Array.isArray(result.groups)
-          ? result.groups
-          : [];
+      coachSelect.selectedIndex =
+        0;
 
+      groupSelect.selectedIndex =
+        0;
 
-      groups.forEach(
-        function(group) {
-
-          const option =
-            document.createElement(
-              "option"
-            );
-
-
-          option.value =
-            group.id;
-
-
-          option.textContent =
-            group.name;
-
-
-          groupSelect.appendChild(
-            option
-          );
-
-        }
-      );
-
-
-      /*
-       * Tout s'est bien passé.
-       */
 
       messageZone.textContent =
         "";
-
 
       messageZone.classList.add(
         "hidden"
@@ -5009,28 +4974,16 @@ byId("adminLogoutButton")
     };
 
 
-  /*
-   * Construction de l'appel Apps Script.
-   */
-
   script.src =
-
     APPS_SCRIPT_URL +
-
     "?action=getAdminData" +
-
     "&callback=" +
     encodeURIComponent(
       callbackName
     ) +
-
     "&t=" +
     Date.now();
 
-
-  /*
-   * Gestion d'une erreur réseau.
-   */
 
   script.onerror =
     function() {
@@ -5039,7 +4992,6 @@ byId("adminLogoutButton")
         callbackName
       ];
 
-
       supprimerScript(
         script
       );
@@ -5047,7 +4999,6 @@ byId("adminLogoutButton")
 
       messageZone.textContent =
         "Impossible de charger les données Administration.";
-
 
       messageZone.classList.remove(
         "hidden"
