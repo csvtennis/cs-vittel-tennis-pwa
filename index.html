@@ -2830,9 +2830,8 @@ function verifierSessionExistante() {
 
 
   /*
-   * Aucun token enregistré.
-   * On charge immédiatement
-   * la liste des entraîneurs.
+   * Pas de jeton :
+   * charge immédiatement les entraîneurs.
    */
 
   if (!token) {
@@ -2850,8 +2849,8 @@ function verifierSessionExistante() {
 
 
   /*
-   * Un token existe.
-   * On vérifie sa validité.
+   * Un jeton existe :
+   * tentative de reconnexion.
    */
 
   afficherStatut(
@@ -2871,8 +2870,68 @@ function verifierSessionExistante() {
     );
 
 
+  let termine =
+    false;
+
+
+  /*
+   * Sécurité :
+   * si Apps Script ne répond pas sous
+   * 5 secondes, retour à la connexion.
+   */
+
+  const timeout =
+    setTimeout(
+      function() {
+
+        if (termine) {
+          return;
+        }
+
+
+        termine =
+          true;
+
+
+        localStorage.removeItem(
+          TOKEN_KEY
+        );
+
+
+        supprimerScript(
+          script
+        );
+
+
+        afficherStatut(
+          "Chargement des entraîneurs...",
+          "loading"
+        );
+
+
+        chargerEntraineurs();
+
+      },
+      5000
+    );
+
+
   window[callbackName] =
     function(result) {
+
+      if (termine) {
+        return;
+      }
+
+
+      termine =
+        true;
+
+
+      clearTimeout(
+        timeout
+      );
+
 
       delete window[
         callbackName
@@ -2885,7 +2944,7 @@ function verifierSessionExistante() {
 
 
       /*
-       * Token expiré ou refusé.
+       * Jeton refusé ou expiré.
        */
 
       if (
@@ -2912,7 +2971,7 @@ function verifierSessionExistante() {
 
 
       /*
-       * SESSION VALIDE
+       * Session valide.
        */
 
       byId("connectedName")
@@ -2933,6 +2992,11 @@ function verifierSessionExistante() {
         .add(
           "hidden"
         );
+
+
+      byId("coachSelect")
+        .disabled =
+        true;
 
 
       afficherStatut(
@@ -2968,6 +3032,20 @@ function verifierSessionExistante() {
   script.onerror =
     function() {
 
+      if (termine) {
+        return;
+      }
+
+
+      termine =
+        true;
+
+
+      clearTimeout(
+        timeout
+      );
+
+
       delete window[
         callbackName
       ];
@@ -2977,12 +3055,6 @@ function verifierSessionExistante() {
         script
       );
 
-
-      /*
-       * S'il y a un problème de vérification,
-       * on permet quand même une reconnexion
-       * manuelle.
-       */
 
       localStorage.removeItem(
         TOKEN_KEY
