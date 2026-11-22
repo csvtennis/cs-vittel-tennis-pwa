@@ -5228,6 +5228,586 @@ byId("adminLogoutButton")
 
 }
 
+  function creerCreneauDepuisPWA(event) {
+
+  event.preventDefault();
+
+
+  const coachId =
+    byId("slotCoach").value;
+
+
+  const groupId =
+    byId("slotGroup").value;
+
+
+  const day =
+    byId("slotDay").value;
+
+
+  const start =
+    byId("slotStart").value;
+
+
+  const end =
+    byId("slotEnd").value;
+
+
+  const from =
+    byId("slotFrom").value;
+
+
+  const to =
+    byId("slotTo").value;
+
+
+  const messageZone =
+    byId("slotMessage");
+
+
+  const button =
+    byId("createSlotButton");
+
+
+  /*
+   * Vérification des champs.
+   */
+
+  if (
+    !coachId ||
+    !groupId ||
+    !day ||
+    !start ||
+    !end ||
+    !from ||
+    !to
+  ) {
+
+    messageZone.textContent =
+      "Veuillez renseigner tous les champs.";
+
+
+    messageZone.classList.remove(
+      "hidden"
+    );
+
+
+    return;
+
+  }
+
+
+  /*
+   * Vérification des horaires.
+   */
+
+  if (
+    end <= start
+  ) {
+
+    messageZone.textContent =
+      "L'heure de fin doit être après l'heure de début.";
+
+
+    messageZone.classList.remove(
+      "hidden"
+    );
+
+
+    return;
+
+  }
+
+
+  /*
+   * Vérification des dates.
+   */
+
+  if (
+    to < from
+  ) {
+
+    messageZone.textContent =
+      "La date de fin doit être après la date de début.";
+
+
+    messageZone.classList.remove(
+      "hidden"
+    );
+
+
+    return;
+
+  }
+
+
+  /*
+   * Identifiant unique de la requête.
+   */
+
+  let requestId;
+
+
+  if (
+    window.crypto &&
+    typeof window.crypto.randomUUID ===
+      "function"
+  ) {
+
+    requestId =
+      window.crypto.randomUUID();
+
+  }
+
+  else {
+
+    requestId =
+      Date.now().toString() +
+      Math.random()
+        .toString(36)
+        .substring(2);
+
+  }
+
+
+  const payload = {
+
+    action:
+      "createSlot",
+
+    requestId:
+      requestId,
+
+    coachId:
+      coachId,
+
+    groupId:
+      groupId,
+
+    day:
+      day,
+
+    start:
+      start,
+
+    end:
+      end,
+
+    from:
+      from,
+
+    to:
+      to
+
+  };
+
+
+  /*
+   * État visuel pendant la création.
+   */
+
+  button.disabled =
+    true;
+
+
+  button.textContent =
+    "Création en cours...";
+
+
+  messageZone.textContent =
+    "";
+
+
+  messageZone.classList.add(
+    "hidden"
+  );
+
+
+  /*
+   * Envoi à Apps Script.
+   */
+
+  fetch(
+    APPS_SCRIPT_URL,
+    {
+
+      method:
+        "POST",
+
+      mode:
+        "no-cors",
+
+      headers: {
+
+        "Content-Type":
+          "text/plain;charset=utf-8"
+
+      },
+
+      body:
+        JSON.stringify(
+          payload
+        )
+
+    }
+  )
+
+    .then(
+      function() {
+
+        setTimeout(
+          function() {
+
+            recupererResultatCreationCreneau(
+              requestId,
+              0
+            );
+
+          },
+          900
+        );
+
+      }
+    )
+
+    .catch(
+      function(error) {
+
+        console.error(
+          error
+        );
+
+
+        button.disabled =
+          false;
+
+
+        button.textContent =
+          "Créer et générer les séances";
+
+
+        messageZone.textContent =
+          "Impossible de créer le créneau.";
+
+
+        messageZone.classList.remove(
+          "hidden"
+        );
+
+      }
+    );
+
+}
+
+  byId("slotForm")
+  .addEventListener(
+    "submit",
+    creerCreneauDepuisPWA
+  );
+
+  function recupererResultatCreationCreneau(
+  requestId,
+  tentative
+) {
+
+  /*
+   * Limite le nombre de tentatives.
+   */
+
+  if (
+    tentative >= 15
+  ) {
+
+    const button =
+      byId("createSlotButton");
+
+
+    button.disabled =
+      false;
+
+
+    button.textContent =
+      "Créer et générer les séances";
+
+
+    const messageZone =
+      byId("slotMessage");
+
+
+    messageZone.textContent =
+      "La création du créneau a pris trop de temps. Réessayez.";
+
+
+    messageZone.classList.remove(
+      "hidden"
+    );
+
+
+    return;
+
+  }
+
+
+  const callbackName =
+    "createSlotCallback_" +
+    requestId.replace(
+      /-/g,
+      ""
+    ) +
+    "_" +
+    tentative;
+
+
+  const script =
+    document.createElement(
+      "script"
+    );
+
+
+  window[callbackName] =
+    function(result) {
+
+      delete window[
+        callbackName
+      ];
+
+
+      supprimerScript(
+        script
+      );
+
+
+      /*
+       * Apps Script n'a pas encore terminé.
+       */
+
+      if (
+        result &&
+        result.attente
+      ) {
+
+        setTimeout(
+          function() {
+
+            recupererResultatCreationCreneau(
+              requestId,
+              tentative + 1
+            );
+
+          },
+          700
+        );
+
+
+        return;
+
+      }
+
+
+      const button =
+        byId("createSlotButton");
+
+
+      const messageZone =
+        byId("slotMessage");
+
+
+      button.disabled =
+        false;
+
+
+      button.textContent =
+        "Créer et générer les séances";
+
+
+      /*
+       * Erreur retournée par Apps Script.
+       */
+
+      if (
+        !result ||
+        !result.succes
+      ) {
+
+        messageZone.textContent =
+          result &&
+          result.message
+            ? result.message
+            : "Impossible de créer le créneau.";
+
+
+        messageZone.classList.remove(
+          "hidden"
+        );
+
+
+        return;
+
+      }
+
+
+      /*
+       * Résultat renvoyé par creerCreneau().
+       */
+
+      const creation =
+        result.result || {};
+
+
+      /*
+       * Nombre de séances générées.
+       */
+
+      const nombreSeances =
+        Number(
+          creation.count || 0
+        );
+
+
+      messageZone.textContent =
+        nombreSeances +
+        " séance(s) générée(s) avec succès.";
+
+
+      messageZone.classList.remove(
+        "hidden"
+      );
+
+
+      /*
+       * Réinitialisation partielle du formulaire.
+       *
+       * On conserve l'entraîneur et le groupe
+       * pour faciliter une éventuelle nouvelle
+       * saisie.
+       */
+
+      byId("slotDay")
+        .value =
+        "LUNDI";
+
+
+      byId("slotStart")
+        .value =
+        "14:00";
+
+
+      byId("slotEnd")
+        .value =
+        "15:30";
+
+
+      byId("slotFrom")
+        .value =
+        "";
+
+
+      byId("slotTo")
+        .value =
+        "";
+
+
+      /*
+       * Si un entraîneur est actuellement
+       * connecté dans la PWA, ses séances
+       * sont rechargées.
+       */
+
+      const token =
+        localStorage.getItem(
+          TOKEN_KEY
+        );
+
+
+      if (token) {
+
+        chargerMesSeances();
+
+      }
+
+    };
+
+
+  /*
+   * Appel de récupération du résultat.
+   */
+
+  script.src =
+
+    APPS_SCRIPT_URL +
+
+    "?action=getCreateSlotResult" +
+
+    "&requestId=" +
+    encodeURIComponent(
+      requestId
+    ) +
+
+    "&callback=" +
+    encodeURIComponent(
+      callbackName
+    ) +
+
+    "&t=" +
+    Date.now();
+
+
+  /*
+   * Gestion d'une erreur réseau.
+   */
+
+  script.onerror =
+    function() {
+
+      delete window[
+        callbackName
+      ];
+
+
+      supprimerScript(
+        script
+      );
+
+
+      const button =
+        byId("createSlotButton");
+
+
+      button.disabled =
+        false;
+
+
+      button.textContent =
+        "Créer et générer les séances";
+
+
+      const messageZone =
+        byId("slotMessage");
+
+
+      messageZone.textContent =
+        "Impossible de vérifier la création du créneau.";
+
+
+      messageZone.classList.remove(
+        "hidden"
+      );
+
+    };
+
+
+  document.body.appendChild(
+    script
+  );
+
+}
+  byId("slotForm")
+  .addEventListener(
+    "submit",
+    creerCreneauDepuisPWA
+  );
+  
+
   /*
    * ======================================
    * SERVICE WORKER
