@@ -1750,9 +1750,7 @@ let coachAttendance = "";
 
 byId("coachCode")
   .classList
-  .add(
-    "hidden"
-  );
+  .add("hidden");
 
 
 byId("loginButton")
@@ -1767,9 +1765,12 @@ byId("logoutButton")
   .remove(
     "hidden"
   );
+        byId("coachSelect")
+  .disabled =
+  true;
 
 
-        byId("coachCode")
+  byId("coachCode")
           .value =
           "";
 
@@ -3169,70 +3170,54 @@ function verifierSessionExistante() {
       }
 
 
-      /*
-       * Session valide.
-       */
+ /*
+ * Session valide :
+ * pas besoin de ressaisir le code.
+ */
 
-      byId("connectedName")
-        .textContent =
-        "Connexion réussie : " +
-        result.entraineur.nom;
-
-
-      byId("connectedBox")
-        .classList
-        .remove(
-          "hidden"
-        );
-
-
-      byId("loginZone")
-        .classList
-        .add(
-          "hidden"
-        );
-
-
-      byId("coachSelect")
-        .disabled =
-        true;
-
-      byId("loginZone")
+byId("loginZone")
   .classList
-  .remove(
-    "hidden"
-  );
+  .remove("hidden");
 
 
 byId("coachCode")
   .classList
-  .add(
-    "hidden"
-  );
+  .add("hidden");
 
 
 byId("loginButton")
   .classList
-  .add(
-    "hidden"
-  );
+  .add("hidden");
 
 
 byId("logoutButton")
   .classList
-  .remove(
-    "hidden"
-  );
+  .remove("hidden");
 
 
-      afficherStatut(
-        "Session restaurée : " +
-        result.entraineur.nom,
-        "success"
-      );
+byId("coachSelect")
+  .disabled =
+  true;
+
+byId("connectedName")
+  .textContent =
+  "Connexion réussie : " +
+  result.entraineur.nom;
 
 
-      chargerMesSeances();
+byId("connectedBox")
+  .classList
+  .remove("hidden");
+
+
+afficherStatut(
+  "Session restaurée : " +
+  result.entraineur.nom,
+  "success"
+);
+
+
+chargerMesSeances();
 
     };
 
@@ -3304,7 +3289,11 @@ byId("logoutButton")
 
 }
 
-  function deconnecterEntraineur() {
+ function deconnecterEntraineur() {
+
+  /*
+   * Récupération du jeton avant suppression.
+   */
 
   const token =
     localStorage.getItem(
@@ -3313,7 +3302,8 @@ byId("logoutButton")
 
 
   /*
-   * Suppression locale immédiate.
+   * Suppression immédiate du jeton
+   * enregistré sur le téléphone.
    */
 
   localStorage.removeItem(
@@ -3321,61 +3311,143 @@ byId("logoutButton")
   );
 
 
+  /*
+   * Réinitialisation des variables
+   * de la séance en cours.
+   */
+
   currentSession =
     null;
+
 
   currentPlayers =
     [];
 
+
   currentAttendance =
     {};
+
 
   coachAttendance =
     "";
 
-byId("loginZone")
-  .classList
-  .add(
-    "hidden"
-  );
+
+  /*
+   * Masquage de la zone
+   * "entraîneur connecté".
+   */
+
+  byId("connectedBox")
+    .classList
+    .add(
+      "hidden"
+    );
 
 
-byId("coachCode")
-  .classList
-  .remove(
-    "hidden"
-  );
+  /*
+   * Masquage des séances.
+   */
+
+  byId("sessionsZone")
+    .classList
+    .add(
+      "hidden"
+    );
 
 
-byId("coachCode")
-  .value =
-  "";
+  /*
+   * Masquage d'une éventuelle
+   * feuille de présence ouverte.
+   */
+
+  byId("attendanceZone")
+    .classList
+    .add(
+      "hidden"
+    );
 
 
-byId("loginButton")
-  .classList
-  .remove(
-    "hidden"
-  );
+  /*
+   * Réactivation du choix
+   * de l'entraîneur.
+   */
+
+  byId("coachSelect")
+    .disabled =
+    false;
 
 
-byId("logoutButton")
-  .classList
-  .add(
-    "hidden"
-  );
+  byId("coachSelect")
+    .value =
+    "";
 
 
-byId("coachSelect")
-  .disabled =
-  false;
+  /*
+   * Réinitialisation du code personnel.
+   */
+
+  byId("coachCode")
+    .value =
+    "";
 
 
-byId("coachSelect")
-  .value =
-  "";
+  byId("coachCode")
+    .classList
+    .remove(
+      "hidden"
+    );
 
 
+  /*
+   * Le bouton vert
+   * "Se connecter" redevient disponible.
+   */
+
+  byId("loginButton")
+    .classList
+    .remove(
+      "hidden"
+    );
+
+
+  byId("loginButton")
+    .disabled =
+    false;
+
+
+  byId("loginButton")
+    .textContent =
+    "Se connecter";
+
+
+  /*
+   * Masquage du bouton rouge
+   * "Déconnexion".
+   */
+
+  byId("logoutButton")
+    .classList
+    .add(
+      "hidden"
+    );
+
+
+  /*
+   * Le bloc code + connexion reste
+   * masqué jusqu'à la sélection
+   * d'un nouvel entraîneur.
+   */
+
+  byId("loginZone")
+    .classList
+    .add(
+      "hidden"
+    );
+
+
+  /*
+   * Information utilisateur.
+   */
 
   afficherStatut(
     "Déconnexion effectuée.",
@@ -3384,13 +3456,18 @@ byId("coachSelect")
 
 
   /*
-   * Suppression également
-   * côté Apps Script.
+   * Suppression du jeton également
+   * côté Google Apps Script.
+   *
+   * La déconnexion locale est déjà faite,
+   * donc une éventuelle erreur réseau
+   * ne bloque pas l'utilisateur.
    */
 
   if (token) {
 
     const callbackName =
+
       "logoutCallback_" +
       Date.now();
 
@@ -3401,8 +3478,10 @@ byId("coachSelect")
       );
 
 
-    window[callbackName] =
-      function() {
+    window[
+      callbackName
+    ] =
+      function(result) {
 
         delete window[
           callbackName
@@ -3456,6 +3535,11 @@ byId("coachSelect")
 
   }
 
+
+  /*
+   * Recharge la liste des entraîneurs
+   * pour permettre une nouvelle connexion.
+   */
 
   chargerEntraineurs();
 
