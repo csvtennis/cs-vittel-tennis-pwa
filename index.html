@@ -647,6 +647,23 @@
 .logout-button:hover {
   background: #b91c1c;
 }
+  .session-timer {
+  margin-top: 10px;
+
+  padding: 10px 12px;
+
+  border-radius: 10px;
+
+  background: #edf5ef;
+
+  color: #166534;
+
+  text-align: center;
+
+  font-size: 14px;
+
+  font-weight: 700;
+}
 
   </style>
 
@@ -728,6 +745,11 @@
 >
   Déconnexion
 </button>
+      
+     <div
+  id="sessionTimer"
+  class="session-timer hidden"
+></div> 
 
     </div>
 
@@ -858,6 +880,8 @@
 
   const TOKEN_KEY =
     "csvt_coach_token";
+  let timerSessionInterval =
+  null;
   
 let currentSession = null;
 
@@ -877,10 +901,6 @@ let coachAttendance = "";
 
   const EXPIRATION_KEY =
   "csvt_coach_expiration";
-
-
-let timerSessionInterval =
-  null;
 
   /*
    * ======================================
@@ -1732,6 +1752,9 @@ let timerSessionInterval =
     TOKEN_KEY,
     result.token
   );
+    demarrerTimerSession(
+  result.expiration
+);
 
    localStorage.setItem(
   EXPIRATION_KEY,
@@ -3211,10 +3234,8 @@ byId("connectedBox")
   .remove("hidden");
 
 
-afficherStatut(
-  "Session restaurée : " +
-  result.entraineur.nom,
-  "success"
+demarrerTimerSession(
+  result.expiration
 );
 
 
@@ -3307,6 +3328,44 @@ if (
     TOKEN_KEY
   );
 
+   /*
+ * Arrêt du compteur de session.
+ */
+
+if (
+  timerSessionInterval !== null
+) {
+
+  clearInterval(
+    timerSessionInterval
+  );
+
+  timerSessionInterval =
+    null;
+
+}
+
+
+/*
+ * Masquage du compteur.
+ */
+
+const timerZone =
+  byId(
+    "sessionTimer"
+  );
+
+
+if (timerZone) {
+
+  timerZone.textContent =
+    "";
+
+  timerZone.classList.add(
+    "hidden"
+  );
+
+}
 
   /*
    * Réinitialisation des variables
@@ -3548,15 +3607,15 @@ byId("logoutButton")
     deconnecterEntraineur
   );  
 
- function demarrerTimerSession(expiration) {
-
-  /*
-   * Conversion et contrôle de la date d'expiration.
-   */
+  function demarrerTimerSession(expiration) {
 
   const expirationTimestamp =
     Number(expiration);
 
+
+  /*
+   * Vérification de la valeur reçue.
+   */
 
   if (
     !Number.isFinite(expirationTimestamp)
@@ -3573,7 +3632,7 @@ byId("logoutButton")
 
 
   /*
-   * Arrêt d'un éventuel compteur existant.
+   * Arrêt d'un éventuel ancien compteur.
    */
 
   if (
@@ -3584,11 +3643,39 @@ byId("logoutButton")
       timerSessionInterval
     );
 
-
     timerSessionInterval =
       null;
 
   }
+
+
+  /*
+   * Récupération de la zone que nous
+   * avons créée à l'étape 1.
+   */
+
+  const zone =
+    byId("sessionTimer");
+
+
+  if (!zone) {
+
+    console.error(
+      "sessionTimer introuvable."
+    );
+
+    return;
+
+  }
+
+
+  /*
+   * Affichage de la zone.
+   */
+
+  zone.classList.remove(
+    "hidden"
+  );
 
 
   function actualiserTimer() {
@@ -3599,10 +3686,10 @@ byId("logoutButton")
 
 
     /*
-     * Le compteur est arrivé à zéro.
+     * Fin du compteur.
      *
-     * Le timer reste uniquement visuel :
-     * le jeton n'est pas supprimé ici.
+     * Important :
+     * le timer ne supprime PAS le jeton.
      */
 
     if (
@@ -3617,17 +3704,14 @@ byId("logoutButton")
           timerSessionInterval
         );
 
-
         timerSessionInterval =
           null;
 
       }
 
 
-      afficherStatut(
-        "Session expirée. Reconnectez-vous.",
-        "error"
-      );
+      zone.textContent =
+        "Session expirée";
 
 
       return;
@@ -3636,7 +3720,8 @@ byId("logoutButton")
 
 
     /*
-     * Calcul du temps restant.
+     * Conversion du temps restant
+     * en heures et minutes.
      */
 
     const totalMinutes =
@@ -3656,20 +3741,18 @@ byId("logoutButton")
 
 
     /*
-     * Affichage.
+     * Texte affiché sous Déconnexion.
      */
 
-    afficherStatut(
-      "Session restante : " +
+    zone.textContent =
+      "Fermeture automatique de la session dans : " +
       heures +
       " h " +
       String(minutes).padStart(
         2,
         "0"
       ) +
-      " min",
-      "success"
-    );
+      " min";
 
   }
 
@@ -3682,7 +3765,7 @@ byId("logoutButton")
 
 
   /*
-   * Actualisation toutes les minutes.
+   * Mise à jour toutes les minutes.
    */
 
   timerSessionInterval =
