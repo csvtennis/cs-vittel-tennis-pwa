@@ -1085,43 +1085,55 @@ let coachAttendance = "";
 
   function chargerEntraineurs() {
 
-    if (
-      APPS_SCRIPT_URL.indexOf(
-        "COLLE_ICI"
-      ) !== -1
-    ) {
-
-      afficherErreur(
-        "L'adresse Apps Script n'a pas été renseignée."
-      );
+  const select =
+    byId(
+      "coachSelect"
+    );
 
 
-      return;
-
-    }
-
-
-    const script =
-      document.createElement(
-        "script"
-      );
+  afficherStatut(
+    "Chargement depuis Apps Script...",
+    "loading"
+  );
 
 
-    script.src =
-
-      APPS_SCRIPT_URL +
-
-      "?action=getCoaches" +
-
-      "&callback=recevoirEntraineurs" +
-
-      "&t=" +
-
-      Date.now();
+  select.innerHTML =
+    '<option value="">' +
+    'Chargement des entraîneurs...' +
+    '</option>';
 
 
-    script.onerror =
+  const callbackName =
+    "recevoirCoaches_" +
+    Date.now();
+
+
+  const script =
+    document.createElement(
+      "script"
+    );
+
+
+  let termine =
+    false;
+
+
+  /*
+   * Diagnostic après 8 secondes.
+   */
+
+  const timeout =
+    setTimeout(
       function() {
+
+        if (termine) {
+          return;
+        }
+
+
+        termine =
+          true;
+
 
         supprimerScript(
           script
@@ -1129,28 +1141,179 @@ let coachAttendance = "";
 
 
         afficherErreur(
-          "Impossible de charger la liste des entraîneurs."
+          "Apps Script ne répond pas à getCoaches."
         );
 
-      };
+      },
+      8000
+    );
 
 
-    script.onload =
-      function() {
+  window[
+    callbackName
+  ] =
+    function(result) {
 
-        supprimerScript(
-          script
-        );
-
-      };
+      if (termine) {
+        return;
+      }
 
 
-    document.body
-      .appendChild(
+      termine =
+        true;
+
+
+      clearTimeout(
+        timeout
+      );
+
+
+      delete window[
+        callbackName
+      ];
+
+
+      supprimerScript(
         script
       );
 
-  }
+
+      select.innerHTML =
+        "";
+
+
+      const first =
+        document.createElement(
+          "option"
+        );
+
+
+      first.value =
+        "";
+
+
+      first.textContent =
+        "Sélectionnez votre nom";
+
+
+      select.appendChild(
+        first
+      );
+
+
+      if (
+        !result ||
+        !result.succes ||
+        !Array.isArray(
+          result.coaches
+        )
+      ) {
+
+        afficherErreur(
+          "Réponse Apps Script incorrecte."
+        );
+
+
+        return;
+
+      }
+
+
+      result.coaches.forEach(
+        function(coach) {
+
+          const option =
+            document.createElement(
+              "option"
+            );
+
+
+          option.value =
+            coach.id;
+
+
+          option.textContent =
+            coach.nom;
+
+
+          select.appendChild(
+            option
+          );
+
+        }
+      );
+
+
+      afficherStatut(
+        result.coaches.length +
+        " entraîneur(s) chargé(s).",
+        "success"
+      );
+
+    };
+
+
+  script.src =
+
+    APPS_SCRIPT_URL +
+
+    "?action=getCoaches" +
+
+    "&callback=" +
+    encodeURIComponent(
+      callbackName
+    ) +
+
+    "&t=" +
+    Date.now();
+
+
+  console.log(
+    "URL getCoaches :",
+    script.src
+  );
+
+
+  script.onerror =
+    function() {
+
+      if (termine) {
+        return;
+      }
+
+
+      termine =
+        true;
+
+
+      clearTimeout(
+        timeout
+      );
+
+
+      delete window[
+        callbackName
+      ];
+
+
+      supprimerScript(
+        script
+      );
+
+
+      afficherErreur(
+        "Erreur de chargement de l'API Apps Script."
+      );
+
+    };
+
+
+  document.body
+    .appendChild(
+      script
+    );
+
+}
 
 
   /*
