@@ -2806,27 +2806,37 @@ function verifierSessionExistante() {
 
 
   /*
-   * Aucun jeton enregistré :
-   * connexion normale.
+   * Aucun token enregistré.
+   * On charge immédiatement
+   * la liste des entraîneurs.
    */
 
   if (!token) {
 
-    chargerEnt*aineurs();
+    afficherStatut(
+      "Chargement des entraîneurs...",
+      "loading"
+    );
+
+    chargerEntraineurs();
 
     return;
 
   }
 
 
-  a*ficherStatut(
-    "Reconnexion en *ours...",
+  /*
+   * Un token existe.
+   * On vérifie sa validité.
+   */
+
+  afficherStatut(
+    "Reconnexion en cours...",
     "loading"
   );
 
 
   const callbackName =
-
     "sessionCallback_" +
     Date.now();
 
@@ -2851,23 +2861,22 @@ function verifierSessionExistante() {
 
 
       /*
-       * Jeton invalide ou expiré.
+       * Token expiré ou refusé.
        */
 
       if (
         !result ||
- *      !result.succes
+        !result.succes
       ) {
 
-  *     localStorage
-          .remov*Item(
-            TOKEN_KEY
-      *   );
+        localStorage.removeItem(
+          TOKEN_KEY
+        );
 
 
         afficherStatut(
-          "Session expirée. Reconnectez-vous.",
-          "error"
+          "Chargement des entraîneurs...",
+          "loading"
         );
 
 
@@ -2879,119 +2888,101 @@ function verifierSessionExistante() {
 
 
       /*
-       * Session encore valide.
+       * SESSION VALIDE
        */
 
-      byId("connectedName"*
+      byId("connectedName")
         .textContent =
-        "C*nnexion réussie : " +
-        resu*t.entraineur.nom;
+        "Connexion réussie : " +
+        result.entraineur.nom;
 
 
-      byId("co*nectedBox")
+      byId("connectedBox")
         .classList
         .remove(
           "hidden"
         );
 
 
-      /*
-       * On n'a plus besoin
-       * de la saisie du code.
-       */
-
       byId("loginZone")
-       *.classList
+        .classList
         .add(
           "hidden"
         );
 
 
       afficherStatut(
-        "Session restaurée.",
+        "Session restaurée : " +
+        result.entraineur.nom,
         "success"
       );
 
 
-      /*
-       * Charge immédiatement
-       * les séances de l'entraîneur.
-       */
-
-      chargerMesSeances()*
+      chargerMesSeances();
 
     };
 
 
   script.src =
 
-    APP*_SCRIPT_URL +
+    APPS_SCRIPT_URL +
 
-    "?action=checkS*ssion" +
+    "?action=checkSession" +
 
     "&token=" +
-    enco*eURIComponent(
+    encodeURIComponent(
       token
-    ) +*
+    ) +
+
     "&callback=" +
-    callbackNa*e +
+    callbackName +
 
     "&t=" +
     Date.now();
 
-*  script.onerror =
-    function() *
+
+  script.onerror =
+    function() {
 
       delete window[
         callbackName
       ];
 
 
-      supprime*Script(
+      supprimerScript(
         script
       );
 
 
-*     afficherErreur(
-        "Impo*sible de vérifier la session."
-   *  );
+      /*
+       * S'il y a un problème de vérification,
+       * on permet quand même une reconnexion
+       * manuelle.
+       */
+
+      localStorage.removeItem(
+        TOKEN_KEY
+      );
 
 
-      chargerEntraineurs();*
+      afficherStatut(
+        "Chargement des entraîneurs...",
+        "loading"
+      );
+
+
+      chargerEntraineurs();
+
     };
 
 
-  document.body
-    .app*ndChild(
-      script
-    );
-
-}
-
-  function verifierSessionExistante() {
-
-  const token =
-    localStorage.getItem(
-      TOKEN_KEY
-    );
-
-
-  if (!token) {
-
-    chargerEntraineurs();
-
-    return;
-
-  }
-
-
-  afficherStatut(
-    "Reconnexion en cours...",
-    "loading"
+  document.body.appendChild(
+    script
   );
 
-  // suite de la fonction...
 }
+
+  
   
 
   /*
