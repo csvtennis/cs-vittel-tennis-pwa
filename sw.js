@@ -1,5 +1,5 @@
 const CACHE_NAME =
-  "cs-vittel-tennis-v16";
+  "cs-vittel-tennis-v17";
 
 
 const FILES_TO_CACHE = [
