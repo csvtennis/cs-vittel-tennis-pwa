@@ -843,6 +843,32 @@
 <script>
 
 alert("DEBUT JAVASCRIPT OK");  
+  window.onerror =
+  function(
+    message,
+    source,
+    line,
+    column,
+    error
+  ) {
+
+    alert(
+      "ERREUR JAVASCRIPT\n\n" +
+      "Message : " +
+      message +
+      "\n\nLigne : " +
+      line +
+      "\nColonne : " +
+      column
+    );
+
+    console.error(
+      "Erreur JavaScript :",
+      error
+    );
+
+    return false;
+  };
 
   /*
    * ======================================
