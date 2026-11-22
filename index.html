@@ -980,20 +980,7 @@
 
     </div>
 
-    <div
-  id="adminAccessZone"
-  class="admin-access-zone"
->
-
-  <button
-    id="adminButton"
-    type="button"
-    class="admin-button"
-  >
-    🔒 Administration
-  </button>
-
-</div>
+ 
 
  <div
   id="adminLoginZone"
@@ -1182,6 +1169,21 @@
 
   </section>
 
+   <div
+  id="adminAccessZone"
+  class="admin-access-zone"
+>
+
+  <button
+    id="adminButton"
+    type="button"
+    class="admin-button"
+  >
+    🔒 Administration
+  </button>
+
+</div>
+  
 </main>
 
 
@@ -4152,11 +4154,7 @@ byId("logoutButton")
    * Masque les éléments de connexion entraîneur.
    */
 
-  byId("adminAccessZone")
-    .classList
-    .add(
-      "hidden"
-    );
+
 
 
   byId("loginZone")
@@ -4227,11 +4225,6 @@ function retourAdministration() {
    * Réaffiche le bouton Administration.
    */
 
-  byId("adminAccessZone")
-    .classList
-    .remove(
-      "hidden"
-    );
 
 
   /*
@@ -4516,15 +4509,6 @@ byId("adminBackButton")
     );
 
 
-  /*
-   * Masque le bouton d'accès Administration.
-   */
-
-  byId("adminAccessZone")
-    .classList
-    .add(
-      "hidden"
-    );
 
 
   /*
