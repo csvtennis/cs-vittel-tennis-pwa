@@ -1735,8 +1735,7 @@ let coachAttendance = "";
          * du jeton de 12 heures.
          */
 
-        localStorage
-  .setItem(
+        localStorage.setItem(
     TOKEN_KEY,
     result.token
   );
@@ -3092,12 +3091,6 @@ function verifierSessionExistante() {
         termine =
           true;
 
-
-        localStorage.removeItem(
-          TOKEN_KEY
-        );
-
-
         supprimerScript(
           script
         );
@@ -3239,48 +3232,26 @@ chargerMesSeances();
     "&t=" +
     Date.now();
 
+script.onerror =
+  function() {
 
-  script.onerror =
-    function() {
-
-      if (termine) {
-        return;
-      }
-
-
-      termine =
-        true;
+    delete window[
+      callbackName
+    ];
 
 
-      clearTimeout(
-        timeout
-      );
+    supprimerScript(
+      script
+    );
 
 
-      delete window[
-        callbackName
-      ];
+    afficherErreur(
+      "Impossible de vérifier la session. Réessayez."
+    );
+
+  };
 
 
-      supprimerScript(
-        script
-      );
-
-
-      localStorage.removeItem(
-        TOKEN_KEY
-      );
-
-
-      afficherStatut(
-        "Chargement des entraîneurs...",
-        "loading"
-      );
-
-
-      chargerEntraineurs();
-
-    };
 
 
   document.body.appendChild(
@@ -3604,7 +3575,7 @@ byId("logoutButton")
    * ======================================
    */
 
-  chargerEntraineurs();
+  verifierSessionExistante();
 
 </script>
 
