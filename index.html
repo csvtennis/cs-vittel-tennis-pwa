@@ -664,6 +664,137 @@
   font-weight: 700;
 }
 
+  /*
+ * ======================================
+ * BOUTON ADMINISTRATION
+ * ======================================
+ */
+
+.admin-access-zone {
+  margin-top: 18px;
+
+  padding-top: 16px;
+
+  border-top:
+    1px solid #d8e2da;
+}
+
+
+.admin-button {
+  width: 100%;
+
+  min-height: 52px;
+
+  background: #172033;
+
+  color: #ffffff;
+
+  border: none;
+
+  border-radius: 12px;
+
+  font-size: 16px;
+
+  font-weight: 800;
+
+  cursor: pointer;
+}
+
+
+.admin-button:active {
+  background: #0f172a;
+}
+/*
+ * ======================================
+ * ÉCRAN CONNEXION ADMINISTRATION
+ * ======================================
+ */
+
+.admin-login-zone {
+  margin-top: 18px;
+
+  padding: 18px;
+
+  background: #f8fafc;
+
+  border:
+    1px solid #d8e2da;
+
+  border-radius: 14px;
+}
+
+
+.admin-login-zone h2 {
+  margin:
+    0 0 18px;
+
+  color: #172033;
+
+  font-size: 22px;
+}
+
+
+.admin-login-button {
+  width: 100%;
+
+  min-height: 52px;
+
+  margin-top: 12px;
+
+  background: #172033;
+
+  color: #ffffff;
+
+  border: none;
+
+  border-radius: 12px;
+
+  font-size: 16px;
+
+  font-weight: 800;
+
+  cursor: pointer;
+}
+
+
+.admin-login-button:active {
+  background: #0f172a;
+}
+
+
+.admin-back-button {
+  width: 100%;
+
+  min-height: 52px;
+
+  margin-top: 10px;
+
+  background: #e2e8f0;
+
+  color: #334155;
+
+  border: none;
+
+  border-radius: 12px;
+
+  font-size: 16px;
+
+  font-weight: 800;
+
+  cursor: pointer;
+}
+
+
+.admin-back-button:active {
+  background: #cbd5e1;
+}
+
+
+#adminError {
+  margin-top: 12px;
+}
+    
+
   </style>
 
 </head>
@@ -751,6 +882,72 @@
 ></div> 
 
     </div>
+
+    <div
+  id="adminAccessZone"
+  class="admin-access-zone"
+>
+
+  <button
+    id="adminButton"
+    type="button"
+    class="admin-button"
+  >
+    🔒 Administration
+  </button>
+
+</div>
+
+ <div
+  id="adminLoginZone"
+  class="admin-login-zone hidden"
+>
+
+  <h2>
+    Accès administrateur
+  </h2>
+
+
+  <label for="adminCode">
+    Code administrateur
+  </label>
+
+
+  <input
+    id="adminCode"
+    type="password"
+    inputmode="numeric"
+    autocomplete="off"
+    maxlength="12"
+    placeholder="Saisissez le code administrateur"
+  >
+
+
+  <button
+    id="adminLoginButton"
+    type="button"
+    class="admin-login-button"
+  >
+    Se connecter
+  </button>
+
+
+  <button
+    id="adminBackButton"
+    type="button"
+    class="admin-back-button"
+  >
+    Retour
+  </button>
+
+
+  <div
+    id="adminError"
+    class="status error hidden"
+    aria-live="polite"
+  ></div>
+
+</div>   
 
 
     <div
@@ -3811,6 +4008,141 @@ byId("logoutButton")
     );
 
 }
+
+  function ouvrirAdministration() {
+
+  /*
+   * Masque les éléments de connexion entraîneur.
+   */
+
+  byId("adminAccessZone")
+    .classList
+    .add(
+      "hidden"
+    );
+
+
+  byId("loginZone")
+    .classList
+    .add(
+      "hidden"
+    );
+
+
+  /*
+   * Affiche la connexion administrateur.
+   */
+
+  byId("adminLoginZone")
+    .classList
+    .remove(
+      "hidden"
+    );
+
+
+  /*
+   * Réinitialise le code.
+   */
+
+  byId("adminCode")
+    .value =
+    "";
+
+
+  byId("adminError")
+    .classList
+    .add(
+      "hidden"
+    );
+
+
+  /*
+   * Place directement le curseur
+   * dans le champ code.
+   */
+
+  setTimeout(
+    function() {
+
+      byId("adminCode")
+        .focus();
+
+    },
+    100
+  );
+
+}
+
+function retourAdministration() {
+
+  /*
+   * Masque l'écran administrateur.
+   */
+
+  byId("adminLoginZone")
+    .classList
+    .add(
+      "hidden"
+    );
+
+
+  /*
+   * Réaffiche le bouton Administration.
+   */
+
+  byId("adminAccessZone")
+    .classList
+    .remove(
+      "hidden"
+    );
+
+
+  /*
+   * Efface le code administrateur.
+   */
+
+  byId("adminCode")
+    .value =
+    "";
+
+
+  byId("adminError")
+    .classList
+    .add(
+      "hidden"
+    );
+
+
+  /*
+   * Si aucun entraîneur n'est sélectionné,
+   * la zone Code personnel reste masquée.
+   */
+
+  if (
+    !byId("coachSelect").value
+  ) {
+
+    byId("loginZone")
+      .classList
+      .add(
+        "hidden"
+      );
+
+  }
+
+}  
+  byId("adminButton")
+  .addEventListener(
+    "click",
+    ouvrirAdministration
+  );
+
+
+byId("adminBackButton")
+  .addEventListener(
+    "click",
+    retourAdministration
+  );
 
   /*
    * ======================================
