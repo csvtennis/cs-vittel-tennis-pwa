@@ -755,12 +755,10 @@
 
 
     <div
-      id="status"
-      class="status loading"
-      aria-live="polite"
-    >
-      Connexion à Google Apps Script...
-    </div>
+  id="status"
+  class="status hidden"
+  aria-live="polite"
+></div>>
 
 
     <div
@@ -924,6 +922,10 @@ let coachAttendance = "";
     const status =
       byId("status");
 
+    status.classList.remove(
+  "hidden"
+);
+
 
     status.textContent =
       message;
@@ -959,6 +961,22 @@ let coachAttendance = "";
     }
 
   }
+
+  function masquerStatut() {
+
+  const status =
+    byId("status");
+
+
+  status.textContent =
+    "";
+
+
+  status.classList.add(
+    "hidden"
+  );
+
+}
 
 
   function afficherErreur(
@@ -1755,15 +1773,11 @@ let coachAttendance = "";
     demarrerTimerSession(
   result.expiration
 );
+        masquerStatut();
 
    localStorage.setItem(
   EXPIRATION_KEY,
   String(result.expiration)
-);
-
-
-demarrerTimerSession(
-  result.expiration
 );
 
         byId("loginZone")
@@ -3073,11 +3087,6 @@ function verifierSessionExistante() {
    * tentative de reconnexion.
    */
 
-  afficherStatut(
-    "Reconnexion en cours...",
-    "loading"
-  );
-
 
   const callbackName =
     "sessionCallback_" +
@@ -3175,6 +3184,7 @@ function verifierSessionExistante() {
 demarrerTimerSession(
   result.expiration
 );
+        masquerStatut();
 
         localStorage.removeItem(
           TOKEN_KEY
@@ -3223,6 +3233,40 @@ byId("coachSelect")
   .disabled =
   true;
 
+const select =
+  byId("coachSelect");
+
+
+select.innerHTML =
+  "";
+
+
+const option =
+  document.createElement(
+    "option"
+  );
+
+
+option.value =
+  result.entraineur.id;
+
+
+option.textContent =
+  result.entraineur.nom;
+
+
+option.selected =
+  true;
+
+
+select.appendChild(
+  option
+);
+
+
+select.disabled =
+  true;
+      
 byId("connectedName")
   .textContent =
   "Connexion réussie : " +
