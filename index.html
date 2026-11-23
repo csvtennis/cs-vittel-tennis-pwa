@@ -7114,42 +7114,33 @@ zone.appendChild(
     chargerRecapMensuel
   );
 
-  function afficherRecapMensuel(result) {
+ function afficherRecapMensuel(result) {
 
   const coachZone =
     byId("coachRecapZone");
 
-
   const coachList =
     byId("coachRecapList");
-
 
   const coachTotal =
     byId("coachRecapTotal");
 
-
   const playerZone =
     byId("playerRecapZone");
-
 
   const playerList =
     byId("playerRecapList");
 
 
   /*
-   * Nettoyage des anciennes données.
+   * Nettoyage.
    */
 
-  coachList.innerHTML =
-    "";
+  coachList.innerHTML = "";
 
+  coachTotal.innerHTML = "";
 
-  coachTotal.innerHTML =
-    "";
-
-
-  playerList.innerHTML =
-    "";
+  playerList.innerHTML = "";
 
 
   /*
@@ -7188,10 +7179,6 @@ zone.appendChild(
           "recap-card";
 
 
-        /*
-         * Nom
-         */
-
         const name =
           document.createElement(
             "span"
@@ -7203,7 +7190,7 @@ zone.appendChild(
 
 
         name.textContent =
-          coach.name;
+          coach.name || coach.id;
 
 
         card.appendChild(
@@ -7212,13 +7199,14 @@ zone.appendChild(
 
 
         /*
-         * Fonction interne pour ajouter
-         * une ligne au récapitulatif.
+         * Fonction interne pour créer
+         * une ligne label / valeur.
          */
 
         function ajouterLigne(
           label,
-          value
+          valeur,
+          classeSupplementaire
         ) {
 
           const line =
@@ -7229,6 +7217,17 @@ zone.appendChild(
 
           line.className =
             "recap-line";
+
+
+          if (
+            classeSupplementaire
+          ) {
+
+            line.classList.add(
+              classeSupplementaire
+            );
+
+          }
 
 
           const labelElement =
@@ -7252,7 +7251,7 @@ zone.appendChild(
 
 
           valueElement.textContent =
-            value;
+            valeur;
 
 
           line.appendChild(
@@ -7272,42 +7271,78 @@ zone.appendChild(
         }
 
 
+        /*
+         * Activité.
+         */
+
         ajouterLigne(
           "Séances prévues",
-          coach.planned
+          String(
+            Number(
+              coach.planned || 0
+            )
+          )
         );
 
 
         ajouterLigne(
           "Présent",
-          coach.present
+          String(
+            Number(
+              coach.present || 0
+            )
+          )
         );
 
 
         ajouterLigne(
           "Absent",
-          coach.absent
+          String(
+            Number(
+              coach.absent || 0
+            )
+          )
         );
 
 
         ajouterLigne(
           "Annulées",
-          coach.cancelled
+          String(
+            Number(
+              coach.cancelled || 0
+            )
+          )
         );
 
 
         ajouterLigne(
           "À renseigner",
-          coach.pending
+          String(
+            Number(
+              coach.pending || 0
+            )
+          )
         );
 
 
-       
+        ajouterLigne(
+          "Taux de présence",
+          Number(
+            coach.rate || 0
+          ).toLocaleString(
+            "fr-FR",
+            {
+              maximumFractionDigits: 1
+            }
+          ) +
+          " %"
+        );
+
+
         /*
-         * Partie financière.
+         * Heures.
          */
 
-        
         ajouterLigne(
           "Heures réalisées",
           Number(
@@ -7315,12 +7350,18 @@ zone.appendChild(
           ).toLocaleString(
             "fr-FR",
             {
+              minimumFractionDigits: 0,
               maximumFractionDigits: 2
             }
           ) +
-          " h"
+          " h",
+          "recap-finance"
         );
 
+
+        /*
+         * Coût horaire.
+         */
 
         ajouterLigne(
           "Coût horaire",
@@ -7336,6 +7377,10 @@ zone.appendChild(
         );
 
 
+        /*
+         * Coût mensuel.
+         */
+
         ajouterLigne(
           "Coût du mois",
           Number(
@@ -7346,25 +7391,9 @@ zone.appendChild(
               style: "currency",
               currency: "EUR"
             }
-          )
+          ),
+          "recap-cost"
         );
-
-
-        /*
-         * Mise en évidence du coût.
-         */
-
-        const lastLine =
-          card.lastElementChild;
-
-
-        if (lastLine) {
-
-          lastLine.classList.add(
-            "recap-cost"
-          );
-
-        }
 
 
         coachList.appendChild(
@@ -7404,6 +7433,10 @@ zone.appendChild(
     );
 
 
+  coachTotal.innerHTML =
+    "";
+
+
   const totalTitle =
     document.createElement(
       "span"
@@ -7418,13 +7451,13 @@ zone.appendChild(
     "TOTAL ENTRAÎNEURS";
 
 
-  const totalHoursElement =
+  const hoursLine =
     document.createElement(
-      "span"
+      "div"
     );
 
 
-  totalHoursElement.textContent =
+  hoursLine.textContent =
     "Heures réalisées : " +
     totalHours.toLocaleString(
       "fr-FR",
@@ -7435,17 +7468,17 @@ zone.appendChild(
     " h";
 
 
-  const totalCostElement =
+  const costLine =
     document.createElement(
       "span"
     );
 
 
-  totalCostElement.className =
+  costLine.className =
     "recap-total-cost";
 
 
-  totalCostElement.textContent =
+  costLine.textContent =
     "Coût total : " +
     totalCost.toLocaleString(
       "fr-FR",
@@ -7462,12 +7495,12 @@ zone.appendChild(
 
 
   coachTotal.appendChild(
-    totalHoursElement
+    hoursLine
   );
 
 
   coachTotal.appendChild(
-    totalCostElement
+    costLine
   );
 
 
@@ -7518,7 +7551,7 @@ zone.appendChild(
 
 
         name.textContent =
-          player.name;
+          player.name || player.id;
 
 
         card.appendChild(
@@ -7545,72 +7578,103 @@ zone.appendChild(
         );
 
 
-        const presence =
-          document.createElement(
-            "div"
+        function ajouterLigneJoueur(
+          label,
+          valeur
+        ) {
+
+          const line =
+            document.createElement(
+              "div"
+            );
+
+
+          line.className =
+            "recap-line";
+
+
+          const labelElement =
+            document.createElement(
+              "span"
+            );
+
+
+          labelElement.textContent =
+            label;
+
+
+          const valueElement =
+            document.createElement(
+              "span"
+            );
+
+
+          valueElement.className =
+            "recap-value";
+
+
+          valueElement.textContent =
+            valeur;
+
+
+          line.appendChild(
+            labelElement
           );
 
 
-        presence.className =
-          "recap-line";
+          line.appendChild(
+            valueElement
+          );
 
 
-        presence.innerHTML =
-          "<span>Présences</span>" +
-          '<span class="recap-value">' +
-          Number(player.present || 0) +
-          "</span>";
+          card.appendChild(
+            line
+          );
+
+        }
 
 
-        card.appendChild(
-          presence
+        ajouterLigneJoueur(
+          "Présences",
+          String(
+            Number(
+              player.present || 0
+            )
+          )
         );
 
 
-        const absence =
-          document.createElement(
-            "div"
-          );
-
-
-        absence.className =
-          "recap-line";
-
-
-        absence.innerHTML =
-          "<span>Absences</span>" +
-          '<span class="recap-value">' +
-          Number(player.absent || 0) +
-          "</span>";
-
-
-        card.appendChild(
-          absence
+        ajouterLigneJoueur(
+          "Absences",
+          String(
+            Number(
+              player.absent || 0
+            )
+          )
         );
 
 
-        const rate =
-          document.createElement(
-            "div"
-          );
+        ajouterLigneJoueur(
+          "Total",
+          String(
+            Number(
+              player.total || 0
+            )
+          )
+        );
 
 
-        rate.className =
-          "recap-line";
-
-
-        rate.innerHTML =
-          "<span>Taux de présence</span>" +
-          '<span class="recap-value">' +
-          Number(player.rate || 0)
-            .toLocaleString(
-              "fr-FR"
-            ) +
-          " %</span>";
-
-
-        card.appendChild(
-          rate
+        ajouterLigneJoueur(
+          "Taux de présence",
+          Number(
+            player.rate || 0
+          ).toLocaleString(
+            "fr-FR",
+            {
+              maximumFractionDigits: 1
+            }
+          ) +
+          " %"
         );
 
 
@@ -7629,6 +7693,7 @@ zone.appendChild(
   );
 
 }
+  
 
   /*
    * ======================================
