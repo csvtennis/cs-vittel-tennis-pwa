@@ -1103,6 +1103,33 @@
   opacity: 0.7;
 }   
 
+.slot-disable-button {
+  width: 100%;
+
+  min-height: 48px;
+
+  margin-top: 14px;
+
+  background: #dc2626;
+
+  color: #ffffff;
+
+  border: none;
+
+  border-radius: 12px;
+
+  font-size: 15px;
+
+  font-weight: 800;
+
+  cursor: pointer;
+}
+
+
+.slot-disable-button:active {
+  background: #b91c1c;
+}
+
   </style>
 
 </head>
@@ -6214,6 +6241,57 @@ byId("adminLogoutButton")
             status
           );
 
+          /*
+ * Bouton disponible uniquement
+ * pour les créneaux actifs.
+ */
+
+if (
+  slot.active !== false
+) {
+
+  const disableButton =
+    document.createElement(
+      "button"
+    );
+
+
+  disableButton.type =
+    "button";
+
+
+  disableButton.className =
+    "slot-disable-button";
+
+
+  disableButton.textContent =
+    "Désactiver ce créneau";
+
+
+  disableButton.addEventListener(
+    "click",
+    function() {
+
+      desactiverCreneau(
+        slot.id
+      );
+
+    }
+  );
+
+
+  card.appendChild(
+    disableButton
+  );
+
+}
+
+
+zone.appendChild(
+  card
+);
+
+
 
           zone.appendChild(
             card
@@ -6274,6 +6352,328 @@ byId("adminLogoutButton")
     "click",
     chargerCreneauxAdministration
   );
+
+  function desactiverCreneau(slotId) {
+
+  if (!slotId) {
+
+    console.error(
+      "Identifiant du créneau absent."
+    );
+
+    return;
+
+  }
+
+
+  /*
+   * Confirmation avant désactivation.
+   */
+
+  const confirmation =
+    window.confirm(
+      "Voulez-vous vraiment désactiver ce créneau ?"
+    );
+
+
+  if (!confirmation) {
+
+    return;
+
+  }
+
+
+  /*
+   * Création d'un identifiant unique
+   * pour cette requête.
+   */
+
+  let requestId;
+
+
+  if (
+    window.crypto &&
+    typeof window.crypto.randomUUID ===
+      "function"
+  ) {
+
+    requestId =
+      window.crypto.randomUUID();
+
+  }
+
+  else {
+
+    requestId =
+      Date.now().toString() +
+      Math.random()
+        .toString(36)
+        .substring(2);
+
+  }
+
+
+  const payload = {
+
+    action:
+      "disableSlot",
+
+    requestId:
+      requestId,
+
+    slotId:
+      slotId
+
+  };
+
+
+  /*
+   * Envoi à Apps Script.
+   */
+
+  fetch(
+    APPS_SCRIPT_URL,
+    {
+
+      method:
+        "POST",
+
+      mode:
+        "no-cors",
+
+      headers: {
+
+        "Content-Type":
+          "text/plain;charset=utf-8"
+
+      },
+
+      body:
+        JSON.stringify(
+          payload
+        )
+
+    }
+  )
+
+    .then(
+      function() {
+
+        setTimeout(
+          function() {
+
+            recupererResultatDesactivationCreneau(
+              requestId,
+              0
+            );
+
+          },
+          900
+        );
+
+      }
+    )
+
+    .catch(
+      function(error) {
+
+        console.error(
+          error
+        );
+
+
+        window.alert(
+          "Impossible de désactiver le créneau."
+        );
+
+      }
+    );
+
+}
+
+  function recupererResultatDesactivationCreneau(
+  requestId,
+  tentative
+) {
+
+  /*
+   * Maximum environ 10 secondes.
+   */
+
+  if (
+    tentative >= 15
+  ) {
+
+    window.alert(
+      "La désactivation a pris trop de temps. Réessayez."
+    );
+
+    return;
+
+  }
+
+
+  const callbackName =
+    "disableSlotCallback_" +
+    requestId.replace(
+      /-/g,
+      ""
+    ) +
+    "_" +
+    tentative;
+
+
+  const script =
+    document.createElement(
+      "script"
+    );
+
+
+  window[callbackName] =
+    function(result) {
+
+      delete window[
+        callbackName
+      ];
+
+
+      supprimerScript(
+        script
+      );
+
+
+      /*
+       * Apps Script travaille encore.
+       */
+
+      if (
+        result &&
+        result.attente
+      ) {
+
+        setTimeout(
+          function() {
+
+            recupererResultatDesactivationCreneau(
+              requestId,
+              tentative + 1
+            );
+
+          },
+          700
+        );
+
+
+        return;
+
+      }
+
+
+      /*
+       * Erreur.
+       */
+
+      if (
+        !result ||
+        !result.succes
+      ) {
+
+        window.alert(
+          result &&
+          result.message
+            ? result.message
+            : "Impossible de désactiver le créneau."
+        );
+
+
+        return;
+
+      }
+
+
+      /*
+       * Désactivation réussie.
+       */
+
+      window.alert(
+        "Créneau désactivé."
+      );
+
+
+      /*
+       * Recharge immédiatement
+       * la liste Administration.
+       */
+
+      chargerCreneauxAdministration();
+
+
+      /*
+       * Si un entraîneur est connecté,
+       * recharge également ses séances.
+       */
+
+      const token =
+        localStorage.getItem(
+          TOKEN_KEY
+        );
+
+
+      if (token) {
+
+        chargerMesSeances();
+
+      }
+
+    };
+
+
+  script.src =
+
+    APPS_SCRIPT_URL +
+
+    "?action=getDisableSlotResult" +
+
+    "&requestId=" +
+    encodeURIComponent(
+      requestId
+    ) +
+
+    "&callback=" +
+    encodeURIComponent(
+      callbackName
+    ) +
+
+    "&t=" +
+    Date.now();
+
+
+  script.onerror =
+    function() {
+
+      delete window[
+        callbackName
+      ];
+
+
+      supprimerScript(
+        script
+      );
+
+
+      window.alert(
+        "Impossible de vérifier la désactivation du créneau."
+      );
+
+    };
+
+
+  document.body.appendChild(
+    script
+  );
+
+}
+  
   
 
   /*
