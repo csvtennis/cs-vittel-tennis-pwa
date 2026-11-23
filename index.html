@@ -1130,6 +1130,155 @@
   background: #b91c1c;
 }
 
+    /*
+ * ======================================
+ * RÉCAPITULATIF MENSUEL
+ * ======================================
+ */
+
+.recap-zone {
+  margin-top: 20px;
+}
+
+
+.recap-zone h4 {
+  margin:
+    0 0 12px;
+
+  color: #172033;
+
+  font-size: 19px;
+
+  font-weight: 800;
+}
+
+
+/*
+ * Carte entraîneur / joueur
+ */
+
+.recap-card {
+  margin-top: 12px;
+
+  padding: 15px;
+
+  background: #ffffff;
+
+  border:
+    1px solid #d8e2da;
+
+  border-radius: 14px;
+}
+
+
+.recap-name {
+  display: block;
+
+  margin-bottom: 10px;
+
+  color: #172033;
+
+  font-size: 17px;
+
+  font-weight: 800;
+}
+
+
+.recap-line {
+  display: flex;
+
+  justify-content: space-between;
+
+  gap: 12px;
+
+  margin-top: 7px;
+
+  color: #475569;
+
+  font-size: 14px;
+}
+
+
+.recap-value {
+  color: #172033;
+
+  font-weight: 700;
+
+  text-align: right;
+}
+
+
+/*
+ * Séparation de la partie financière
+ */
+
+.recap-finance {
+  margin-top: 12px;
+
+  padding-top: 10px;
+
+  border-top:
+    1px solid #d8e2da;
+}
+
+
+.recap-cost {
+  color: #166534;
+
+  font-size: 16px;
+
+  font-weight: 800;
+}
+
+
+/*
+ * Total du mois
+ */
+
+.recap-total {
+  margin-top: 16px;
+
+  padding: 16px;
+
+  background: #dcfce7;
+
+  color: #166534;
+
+  border:
+    1px solid #bbf7d0;
+
+  border-radius: 14px;
+
+  font-weight: 800;
+}
+
+
+.recap-total-title {
+  display: block;
+
+  margin-bottom: 8px;
+
+  font-size: 16px;
+}
+
+
+.recap-total-cost {
+  display: block;
+
+  margin-top: 5px;
+
+  font-size: 22px;
+}
+
+
+/*
+ * Message du récapitulatif
+ */
+
+#recapMessage {
+  margin-top: 12px;
+}
+
   </style>
 
 </head>
@@ -1487,7 +1636,76 @@
   </div>
 
 </div>
-     
+ <div
+  id="adminMonthlyRecap"
+  class="admin-section"
+>
+
+  <h3>
+    📊 Récapitulatif mensuel
+  </h3>
+
+
+  <label for="recapMonth">
+    Mois
+  </label>
+
+  <input
+    id="recapMonth"
+    type="month"
+  >
+
+
+  <button
+    id="loadRecapButton"
+    type="button"
+    class="admin-create-button"
+  >
+    Afficher le récapitulatif
+  </button>
+
+
+  <div
+    id="recapMessage"
+    class="status hidden"
+    aria-live="polite"
+  ></div>
+
+
+  <div
+    id="coachRecapZone"
+    class="recap-zone hidden"
+  >
+
+    <h4>
+      Entraîneurs
+    </h4>
+
+    <div id="coachRecapList"></div>
+
+    <div
+      id="coachRecapTotal"
+      class="recap-total"
+    ></div>
+
+  </div>
+
+
+  <div
+    id="playerRecapZone"
+    class="recap-zone hidden"
+  >
+
+    <h4>
+      Joueurs
+    </h4>
+
+    <div id="playerRecapList"></div>
+
+  </div>
+
+</div>
+    
 
 
   <!-- =====================================
@@ -5048,6 +5266,31 @@ byId("adminBackButton")
    * - slotGroup
    */
 
+    const recapMonth =
+  byId("recapMonth");
+
+
+if (
+  recapMonth &&
+  !recapMonth.value
+) {
+
+  const now =
+    new Date();
+
+
+  recapMonth.value =
+    now.getFullYear() +
+    "-" +
+    String(
+      now.getMonth() + 1
+    ).padStart(
+      2,
+      "0"
+    );
+
+}
+
   chargerDonneesAdministration();
     
   chargerCreneauxAdministration();
@@ -6673,8 +6916,719 @@ zone.appendChild(
   );
 
 }
-  
-  
+
+  function chargerRecapMensuel() {
+
+  const month =
+    byId("recapMonth").value;
+
+
+  const messageZone =
+    byId("recapMessage");
+
+
+  const button =
+    byId("loadRecapButton");
+
+
+  /*
+   * Vérification du mois.
+   */
+
+  if (
+    !month ||
+    !/^\d{4}-\d{2}$/.test(month)
+  ) {
+
+    messageZone.textContent =
+      "Sélectionnez un mois.";
+
+
+    messageZone.classList.remove(
+      "hidden"
+    );
+
+
+    return;
+
+  }
+
+
+  /*
+   * État de chargement.
+   */
+
+  button.disabled =
+    true;
+
+
+  button.textContent =
+    "Chargement...";
+
+
+  messageZone.textContent =
+    "";
+
+
+  messageZone.classList.add(
+    "hidden"
+  );
+
+
+  const callbackName =
+    "monthlyRecapCallback_" +
+    Date.now();
+
+
+  const script =
+    document.createElement(
+      "script"
+    );
+
+
+  window[callbackName] =
+    function(result) {
+
+      delete window[
+        callbackName
+      ];
+
+
+      supprimerScript(
+        script
+      );
+
+
+      button.disabled =
+        false;
+
+
+      button.textContent =
+        "Afficher le récapitulatif";
+
+
+      /*
+       * Erreur serveur.
+       */
+
+      if (
+        !result ||
+        result.succes !== true
+      ) {
+
+        messageZone.textContent =
+          result &&
+          result.message
+            ? result.message
+            : "Impossible de charger le récapitulatif.";
+
+
+        messageZone.classList.remove(
+          "hidden"
+        );
+
+
+        return;
+
+      }
+
+
+      /*
+       * Affichage du récapitulatif.
+       *
+       * Cette fonction sera ajoutée
+       * à l'étape suivante.
+       */
+
+      afficherRecapMensuel(
+        result
+      );
+
+    };
+
+
+  /*
+   * Appel Apps Script.
+   */
+
+  script.src =
+
+    APPS_SCRIPT_URL +
+
+    "?action=getMonthlyRecap" +
+
+    "&month=" +
+    encodeURIComponent(
+      month
+    ) +
+
+    "&callback=" +
+    encodeURIComponent(
+      callbackName
+    ) +
+
+    "&t=" +
+    Date.now();
+
+
+  script.onerror =
+    function() {
+
+      delete window[
+        callbackName
+      ];
+
+
+      supprimerScript(
+        script
+      );
+
+
+      button.disabled =
+        false;
+
+
+      button.textContent =
+        "Afficher le récapitulatif";
+
+
+      messageZone.textContent =
+        "Impossible de contacter le serveur.";
+
+
+      messageZone.classList.remove(
+        "hidden"
+      );
+
+    };
+
+
+  document.body.appendChild(
+    script
+  );
+
+}
+  byId("loadRecapButton")
+  .addEventListener(
+    "click",
+    chargerRecapMensuel
+  );
+
+  function afficherRecapMensuel(result) {
+
+  const coachZone =
+    byId("coachRecapZone");
+
+
+  const coachList =
+    byId("coachRecapList");
+
+
+  const coachTotal =
+    byId("coachRecapTotal");
+
+
+  const playerZone =
+    byId("playerRecapZone");
+
+
+  const playerList =
+    byId("playerRecapList");
+
+
+  /*
+   * Nettoyage des anciennes données.
+   */
+
+  coachList.innerHTML =
+    "";
+
+
+  coachTotal.innerHTML =
+    "";
+
+
+  playerList.innerHTML =
+    "";
+
+
+  /*
+   * ======================================
+   * ENTRAÎNEURS
+   * ======================================
+   */
+
+  const coaches =
+    Array.isArray(result.coaches)
+      ? result.coaches
+      : [];
+
+
+  if (
+    coaches.length === 0
+  ) {
+
+    coachList.innerHTML =
+      "<p>Aucune donnée entraîneur pour ce mois.</p>";
+
+  }
+
+  else {
+
+    coaches.forEach(
+      function(coach) {
+
+        const card =
+          document.createElement(
+            "div"
+          );
+
+
+        card.className =
+          "recap-card";
+
+
+        /*
+         * Nom
+         */
+
+        const name =
+          document.createElement(
+            "span"
+          );
+
+
+        name.className =
+          "recap-name";
+
+
+        name.textContent =
+          coach.name;
+
+
+        card.appendChild(
+          name
+        );
+
+
+        /*
+         * Fonction interne pour ajouter
+         * une ligne au récapitulatif.
+         */
+
+        function ajouterLigne(
+          label,
+          value
+        ) {
+
+          const line =
+            document.createElement(
+              "div"
+            );
+
+
+          line.className =
+            "recap-line";
+
+
+          const labelElement =
+            document.createElement(
+              "span"
+            );
+
+
+          labelElement.textContent =
+            label;
+
+
+          const valueElement =
+            document.createElement(
+              "span"
+            );
+
+
+          valueElement.className =
+            "recap-value";
+
+
+          valueElement.textContent =
+            value;
+
+
+          line.appendChild(
+            labelElement
+          );
+
+
+          line.appendChild(
+            valueElement
+          );
+
+
+          card.appendChild(
+            line
+          );
+
+        }
+
+
+        ajouterLigne(
+          "Séances prévues",
+          coach.planned
+        );
+
+
+        ajouterLigne(
+          "Présent",
+          coach.present
+        );
+
+
+        ajouterLigne(
+          "Absent",
+          coach.absent
+        );
+
+
+        ajouterLigne(
+          "Annulées",
+          coach.cancelled
+        );
+
+
+        ajouterLigne(
+          "À renseigner",
+          coach.pending
+        );
+
+
+       
+        /*
+         * Partie financière.
+         */
+
+        
+        ajouterLigne(
+          "Heures réalisées",
+          Number(
+            coach.hours || 0
+          ).toLocaleString(
+            "fr-FR",
+            {
+              maximumFractionDigits: 2
+            }
+          ) +
+          " h"
+        );
+
+
+        ajouterLigne(
+          "Coût horaire",
+          Number(
+            coach.hourlyCost || 0
+          ).toLocaleString(
+            "fr-FR",
+            {
+              style: "currency",
+              currency: "EUR"
+            }
+          )
+        );
+
+
+        ajouterLigne(
+          "Coût du mois",
+          Number(
+            coach.monthlyCost || 0
+          ).toLocaleString(
+            "fr-FR",
+            {
+              style: "currency",
+              currency: "EUR"
+            }
+          )
+        );
+
+
+        /*
+         * Mise en évidence du coût.
+         */
+
+        const lastLine =
+          card.lastElementChild;
+
+
+        if (lastLine) {
+
+          lastLine.classList.add(
+            "recap-cost"
+          );
+
+        }
+
+
+        coachList.appendChild(
+          card
+        );
+
+      }
+    );
+
+  }
+
+
+  coachZone.classList.remove(
+    "hidden"
+  );
+
+
+  /*
+   * ======================================
+   * TOTAL ENTRAÎNEURS
+   * ======================================
+   */
+
+  const totals =
+    result.totals || {};
+
+
+  const totalHours =
+    Number(
+      totals.hours || 0
+    );
+
+
+  const totalCost =
+    Number(
+      totals.cost || 0
+    );
+
+
+  const totalTitle =
+    document.createElement(
+      "span"
+    );
+
+
+  totalTitle.className =
+    "recap-total-title";
+
+
+  totalTitle.textContent =
+    "TOTAL ENTRAÎNEURS";
+
+
+  const totalHoursElement =
+    document.createElement(
+      "span"
+    );
+
+
+  totalHoursElement.textContent =
+    "Heures réalisées : " +
+    totalHours.toLocaleString(
+      "fr-FR",
+      {
+        maximumFractionDigits: 2
+      }
+    ) +
+    " h";
+
+
+  const totalCostElement =
+    document.createElement(
+      "span"
+    );
+
+
+  totalCostElement.className =
+    "recap-total-cost";
+
+
+  totalCostElement.textContent =
+    "Coût total : " +
+    totalCost.toLocaleString(
+      "fr-FR",
+      {
+        style: "currency",
+        currency: "EUR"
+      }
+    );
+
+
+  coachTotal.appendChild(
+    totalTitle
+  );
+
+
+  coachTotal.appendChild(
+    totalHoursElement
+  );
+
+
+  coachTotal.appendChild(
+    totalCostElement
+  );
+
+
+  /*
+   * ======================================
+   * JOUEURS
+   * ======================================
+   */
+
+  const players =
+    Array.isArray(result.players)
+      ? result.players
+      : [];
+
+
+  if (
+    players.length === 0
+  ) {
+
+    playerList.innerHTML =
+      "<p>Aucune donnée joueur pour ce mois.</p>";
+
+  }
+
+  else {
+
+    players.forEach(
+      function(player) {
+
+        const card =
+          document.createElement(
+            "div"
+          );
+
+
+        card.className =
+          "recap-card";
+
+
+        const name =
+          document.createElement(
+            "span"
+          );
+
+
+        name.className =
+          "recap-name";
+
+
+        name.textContent =
+          player.name;
+
+
+        card.appendChild(
+          name
+        );
+
+
+        const group =
+          document.createElement(
+            "div"
+          );
+
+
+        group.className =
+          "recap-line";
+
+
+        group.textContent =
+          player.group || "";
+
+
+        card.appendChild(
+          group
+        );
+
+
+        const presence =
+          document.createElement(
+            "div"
+          );
+
+
+        presence.className =
+          "recap-line";
+
+
+        presence.innerHTML =
+          "<span>Présences</span>" +
+          '<span class="recap-value">' +
+          Number(player.present || 0) +
+          "</span>";
+
+
+        card.appendChild(
+          presence
+        );
+
+
+        const absence =
+          document.createElement(
+            "div"
+          );
+
+
+        absence.className =
+          "recap-line";
+
+
+        absence.innerHTML =
+          "<span>Absences</span>" +
+          '<span class="recap-value">' +
+          Number(player.absent || 0) +
+          "</span>";
+
+
+        card.appendChild(
+          absence
+        );
+
+
+        const rate =
+          document.createElement(
+            "div"
+          );
+
+
+        rate.className =
+          "recap-line";
+
+
+        rate.innerHTML =
+          "<span>Taux de présence</span>" +
+          '<span class="recap-value">' +
+          Number(player.rate || 0)
+            .toLocaleString(
+              "fr-FR"
+            ) +
+          " %</span>";
+
+
+        card.appendChild(
+          rate
+        );
+
+
+        playerList.appendChild(
+          card
+        );
+
+      }
+    );
+
+  }
+
+
+  playerZone.classList.remove(
+    "hidden"
+  );
+
+}
 
   /*
    * ======================================
