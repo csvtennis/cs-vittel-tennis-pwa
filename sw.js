@@ -1,5 +1,5 @@
 const CACHE_NAME =
-  "cs-vittel-tennis-v36";
+  "cs-vittel-tennis-v37";
 
 
 self.addEventListener(
