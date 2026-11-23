@@ -1005,7 +1005,103 @@
 .admin-logout-button:active {
   background: #b91c1c;
 }
-   
+/*
+ * ======================================
+ * LISTE DES CRÉNEAUX RÉCURRENTS
+ * ======================================
+ */
+
+.admin-refresh-button {
+  width: 100%;
+  min-height: 48px;
+
+  margin-bottom: 12px;
+
+  background: #e2e8f0;
+  color: #334155;
+
+  border: none;
+  border-radius: 12px;
+
+  font-size: 15px;
+  font-weight: 800;
+
+  cursor: pointer;
+}
+
+
+.admin-refresh-button:active {
+  background: #cbd5e1;
+}
+
+
+.slots-list {
+  margin-top: 10px;
+}
+
+
+.slot-card {
+  margin-top: 12px;
+
+  padding: 15px;
+
+  background: #ffffff;
+
+  border:
+    1px solid #d8e2da;
+
+  border-radius: 14px;
+}
+
+
+.slot-title {
+  display: block;
+
+  margin-bottom: 8px;
+
+  color: #172033;
+
+  font-size: 17px;
+  font-weight: 800;
+}
+
+
+.slot-line {
+  margin-top: 5px;
+
+  color: #475569;
+
+  font-size: 15px;
+}
+
+
+.slot-status {
+  display: inline-block;
+
+  margin-top: 10px;
+
+  padding: 5px 10px;
+
+  background: #dcfce7;
+  color: #166534;
+
+  border-radius: 999px;
+
+  font-size: 13px;
+  font-weight: 800;
+}
+
+
+.slot-status.inactive {
+  background: #e5e7eb;
+  color: #64748b;
+}
+
+
+.slot-card.inactive {
+  background: #f8fafc;
+  opacity: 0.7;
+}   
 
   </style>
 
@@ -1331,7 +1427,40 @@
       aria-live="polite"
     ></div>
 
+      </div>
+
+     <div
+  id="adminSlotsList"
+  class="admin-section"
+>
+
+  <h3>
+    📅 Créneaux récurrents existants
+  </h3>
+
+
+  <button
+    id="refreshSlotsButton"
+    type="button"
+    class="admin-refresh-button"
+  >
+    Actualiser la liste
+  </button>
+
+
+  <div
+    id="slotsList"
+    class="slots-list"
+  >
+
+    <p>
+      Chargement des créneaux...
+    </p>
+
   </div>
+
+</div>
+     
 
 
   <!-- =====================================
@@ -4893,6 +5022,8 @@ byId("adminBackButton")
    */
 
   chargerDonneesAdministration();
+    
+  chargerCreneauxAdministration();
 
 }
 
@@ -5668,6 +5799,8 @@ byId("adminLogoutButton")
         nombreSeances +
         " séance(s) générée(s) avec succès.";
 
+    chargerCreneauxAdministration();
+
 
       messageZone.classList.remove(
         "hidden"
@@ -5805,6 +5938,341 @@ byId("adminLogoutButton")
   .addEventListener(
     "submit",
     creerCreneauDepuisPWA
+  );
+
+  function chargerCreneauxAdministration() {
+
+  const zone =
+    byId("slotsList");
+
+
+  if (!zone) {
+
+    console.error(
+      "Zone slotsList introuvable."
+    );
+
+    return;
+
+  }
+
+
+  zone.innerHTML =
+    "<p>Chargement des créneaux...</p>";
+
+
+  const callbackName =
+    "slotsCallback_" +
+    Date.now();
+
+
+  const script =
+    document.createElement(
+      "script"
+    );
+
+
+  window[callbackName] =
+    function(result) {
+
+      delete window[
+        callbackName
+      ];
+
+
+      supprimerScript(
+        script
+      );
+
+
+      zone.innerHTML =
+        "";
+
+
+      /*
+       * Contrôle de la réponse.
+       */
+
+      if (
+        !result ||
+        result.succes !== true
+      ) {
+
+        zone.innerHTML =
+          "<p>Impossible de charger les créneaux.</p>";
+
+        return;
+
+      }
+
+
+      const slots =
+        Array.isArray(result.slots)
+          ? result.slots
+          : [];
+
+
+      /*
+       * Aucun créneau.
+       */
+
+      if (
+        slots.length === 0
+      ) {
+
+        zone.innerHTML =
+          "<p>Aucun créneau récurrent enregistré.</p>";
+
+        return;
+
+      }
+
+
+      /*
+       * Affichage de chaque créneau.
+       */
+
+      slots.forEach(
+        function(slot) {
+
+          const card =
+            document.createElement(
+              "div"
+            );
+
+
+          card.className =
+            "slot-card";
+
+
+          if (
+            slot.active === false
+          ) {
+
+            card.classList.add(
+              "inactive"
+            );
+
+          }
+
+
+          /*
+           * Entraîneur.
+           */
+
+          const title =
+            document.createElement(
+              "span"
+            );
+
+
+          title.className =
+            "slot-title";
+
+
+          title.textContent =
+            slot.coachName || "Entraîneur";
+
+
+          /*
+           * Groupe.
+           */
+
+          const group =
+            document.createElement(
+              "div"
+            );
+
+
+          group.className =
+            "slot-line";
+
+
+          group.textContent =
+            "🎾 " +
+            (
+              slot.groupName ||
+              "Groupe non renseigné"
+            );
+
+
+          /*
+           * Jour et horaires.
+           */
+
+          const schedule =
+            document.createElement(
+              "div"
+            );
+
+
+          schedule.className =
+            "slot-line";
+
+
+          schedule.textContent =
+            "📅 " +
+            (
+              slot.day || ""
+            ) +
+            " · " +
+            (
+              slot.start || ""
+            ) +
+            " - " +
+            (
+              slot.end || ""
+            );
+
+
+          /*
+           * Période.
+           */
+
+          const period =
+            document.createElement(
+              "div"
+            );
+
+
+          period.className =
+            "slot-line";
+
+
+          period.textContent =
+            "Du " +
+            (
+              slot.from || ""
+            ) +
+            " au " +
+            (
+              slot.to || ""
+            );
+
+
+          /*
+           * État du créneau.
+           */
+
+          const status =
+            document.createElement(
+              "span"
+            );
+
+
+          status.className =
+            "slot-status";
+
+
+          if (
+            slot.active === false
+          ) {
+
+            status.textContent =
+              "INACTIF";
+
+
+            status.classList.add(
+              "inactive"
+            );
+
+          }
+
+          else {
+
+            status.textContent =
+              "ACTIF";
+
+          }
+
+
+          /*
+           * Construction finale de la carte.
+           */
+
+          card.appendChild(
+            title
+          );
+
+
+          card.appendChild(
+            group
+          );
+
+
+          card.appendChild(
+            schedule
+          );
+
+
+          card.appendChild(
+            period
+          );
+
+
+          card.appendChild(
+            status
+          );
+
+
+          zone.appendChild(
+            card
+          );
+
+        }
+      );
+
+    };
+
+
+  /*
+   * Appel Apps Script.
+   */
+
+  script.src =
+
+    APPS_SCRIPT_URL +
+
+    "?action=getSlots" +
+
+    "&callback=" +
+    encodeURIComponent(
+      callbackName
+    ) +
+
+    "&t=" +
+    Date.now();
+
+
+  script.onerror =
+    function() {
+
+      delete window[
+        callbackName
+      ];
+
+
+      supprimerScript(
+        script
+      );
+
+
+      zone.innerHTML =
+        "<p>Impossible de charger les créneaux.</p>";
+
+    };
+
+
+  document.body.appendChild(
+    script
+  );
+
+}
+
+  byId("refreshSlotsButton")
+  .addEventListener(
+    "click",
+    chargerCreneauxAdministration
   );
   
 
